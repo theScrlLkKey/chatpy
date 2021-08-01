@@ -171,8 +171,7 @@ while True:
                         # user['data'] = user['data'] + curtime
                         messagea = disconect_cli + ' has left the chat!'
                         messagea = messagea.encode('utf-8')
-                        messagea_header = f"{len(messagea):<{HEADER_LENGTH}}".encode('ut'
-                                                                                     'f-8')
+                        messagea_header = f"{len(messagea):<{HEADER_LENGTH}}".encode('utf-8')
                         client_socket.send(user['header'] + user['data'] + messagea_header + messagea)
 
                 continue
