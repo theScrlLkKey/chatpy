@@ -401,14 +401,8 @@ Total users online: ''' + str(usercount)
                 message = encrypt(message, key)
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                 client_socket.send(message_header + message)
-            elif message == '!webmaster randnum':
-                ttsay = ''
-                try:
-                    for i in range(int(1)):
-                        ttsay = ttsay + str(random.choice('0123456789'))
-                except:
-                    ttsay = 'Digit quantity must be a number'
-                smessage = str(ttsay)
+            elif message == '!webmaster ping':
+                smessage = 'pong!'
                 message = smessage.encode('utf-8')
                 message = encrypt(message, key)
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
