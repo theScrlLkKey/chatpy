@@ -149,6 +149,7 @@ while True:
     try:
         # Now we want to loop over received messages (there might be more than one) and print them
         while True:
+            time.sleep(0.1)
 
             # Receive our "header" containing username length, it's size is defined and constant
             username_header = client_socket.recv(HEADER_LENGTH)
