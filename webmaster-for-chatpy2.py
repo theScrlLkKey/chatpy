@@ -40,7 +40,7 @@ chttop = 'Everything :)'
 uservar = ['Webmaster, ']
 about = """
 Hi. I'm Decky. The guy who made this thing. This chat program was made in python 3 with socket.
-Source code for the server, client, and bot is available over at https://www.lightos.ddns.net.
+Source code for the server, client, and bot is available over at https://lightos.ddns.net/downloads.
 On this server we have the Webmaster and Chatbot, both of which I made myself.
 If you want to learn more about Chatbot do !.chatbot about.
 If you want to report a bug, do !.bug report <problem here> and I will get to it asap!
