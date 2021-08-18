@@ -236,6 +236,8 @@ while True:
 
         # We just did not receive anything
         continue
+    except:
+        continue
     
 ##while True:
 ##
