@@ -239,5 +239,6 @@ while True:
                         messagea = messagea.encode('utf-8')
                         messagea_header = f"{len(messagea):<{HEADER_LENGTH}}".encode('utf-8')
                         client_socket.send(user['header'] + user['data'] + messagea_header + messagea)
-    except:
+    except Exception as err:
+        print(err)
         continue
