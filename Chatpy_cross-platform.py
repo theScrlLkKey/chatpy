@@ -309,7 +309,7 @@ while True:
 
 
                 # Print message
-                if hbc == 'y' and '!webmaster' in message or '!bug' in message or '!chatbot' in message:
+                if hbc == 'y' and '!webmaster' in message or '!bug' in message or '!chatbot' in message or '/post' in message:
                     continue
                 elif message == '!usetaken '+ my_username:
                     print('That username is taken.')
@@ -409,7 +409,20 @@ while True:
                             message = message.split(' ', 2)
                             del message[0]
                             del message[0]
-                            print(f'''Private message from {username}{sep} {', '.join(message)}''')
+
+                            if 'fetchedpost' in ''.join(message):
+                                message = ''.join(message)
+                                message = message.split(' ;`; ')
+                                message.pop(0)
+                                print(f'{message[0]} ({message[1]} - {message[2]})\n\n{message[3]}')
+                            elif 'postlistint' in ''.join(message):
+                                message = ''.join(message)
+                                message = message.split(' ;;; ')
+                                message.pop(0)
+                                newline = '\n'
+                                print(f'All posts, sorted old to new: \n{newline.join(reversed(message))}')
+                            else:
+                                print(f'''Private message from {username}{sep} {', '.join(message)}''')
                     except:
                         continue
 
@@ -422,6 +435,8 @@ while True:
 
                 else:
                     print(f'{username}{sep} {message}')
+
+                # add time
 
 
 
@@ -441,7 +456,8 @@ while True:
             # Any other exception - something happened, exit
             #print('Reading error: '.format(str(e)))
             exit()
-    except KeyboardInterrupt :   
+    except KeyboardInterrupt:
+        try:
             message = input(f'{my_username}{sep} ')
             senmessage = message
             if message == 'exit' or message == 'Exit':
@@ -529,12 +545,19 @@ while True:
                 
             elif message == '!ping':
                 print('Server'+sep+' Your ping is '+str(ping(IP))+'ms.')
+
             # If message is not empty - send it
             elif message:
                 if '!<' in message:
                     usrstatus = message.split(' ', 1)[1]
                     print(f'Status set to: {my_username} {usrstatus}')
 
+                elif message == '/post list':
+                    message = '/post list_int'
+                elif message == '/post new':
+                    title = input('Post title: ')
+                    post = input('Write post:\n')
+                    message = f'/post new {post} ;;; {title}'
                 # Encode message to bytes, prepare header and convert to bytes, like for username above, then send
                 message = message.encode('utf-8')
                 try:
@@ -588,6 +611,10 @@ while True:
                 stimef = int(time.strftime("%M", named_tuple))
                 sttime = stimef
                 sttime += 360
+        except:
+            print('')
+
+
 input('Press enter to exit...')
 
 
