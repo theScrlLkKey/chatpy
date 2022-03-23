@@ -321,6 +321,8 @@ while True:
                     exit()
                 elif username == 'enc_distr' or '!req' in message:
                     continue
+                elif '!file^^^' in message:
+                    continue
                 elif username == my_username:
                     print(f'Server{sep} {message}')
                     time.sleep(1)
