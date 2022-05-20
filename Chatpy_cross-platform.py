@@ -156,6 +156,8 @@ username_header = f"{len(username):<{HEADER_LENGTH}}".encode('utf-8')
 client_socket.send(username_header + username)
 
 
+print_time_str = 'null'
+
 if stlent == 'y':
     dummy_var = 1
 else:
@@ -209,8 +211,12 @@ usrstatus = ''
 while True:
 
 
+
     # Wait for user to input a message
     try:
+        named_tuple = time.localtime()  # get struct_time
+        print_time_str = time.strftime("%I:%M:%S %p", named_tuple)
+
         named_tuple = time.localtime()  # get struct_time
         curtime = int(time.strftime("%M", named_tuple))
         if curtime > sttime:
@@ -326,7 +332,7 @@ while True:
                 elif '!file^^^' in message:
                     continue
                 elif username == my_username:
-                    print(f'Server{sep} {message}')
+                    print(f'{print_time_str} |Server{sep} {message}')
                     time.sleep(1)
                     message = '!usetaken ' + username
                     message = message.encode('utf-8')
@@ -389,7 +395,6 @@ while True:
                     message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                     client_socket.send(message_header + message)
 
-
                 elif message == '!chkusr':
                     smessage = '!chkusrback'
                     message = smessage.encode('utf-8')
@@ -426,19 +431,19 @@ while True:
                                 newline = '\n'
                                 print(f'All posts, sorted old to new: \n{newline.join(reversed(message))}')
                             else:
-                                print(f'''Private message from {username}{sep} {', '.join(message)}''')
+                                print(f'''{print_time_str} |Private message from {username}{sep} {', '.join(message)}''')
                     except:
                         continue
 
 
                 elif '!< ' in message:
-                    print(f'​⃰ {username} {message.split("!< ")[1]}')
+                    print(f'{print_time_str} |​⃰ {username} {message.split("!< ")[1]}')
 
                 elif 'joined the chat!' in message or 'left the chat!' in message:
-                    print(f'Server{sep} {message}')
+                    print(f'{print_time_str} |Server{sep} {message}')
 
                 else:
-                    print(f'{username}{sep} {message}')
+                    print(f'{print_time_str} |{username}{sep} {message}')
 
                 # add time
 
@@ -462,7 +467,7 @@ while True:
             exit()
     except KeyboardInterrupt:
         try:
-            message = input(f'{my_username}{sep} ')
+            message = input(f'{print_time_str} |{my_username}{sep} ')
             senmessage = message
             if message == 'exit' or message == 'Exit':
                 if stlent == 'y':
