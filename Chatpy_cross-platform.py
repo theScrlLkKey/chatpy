@@ -309,7 +309,7 @@ while True:
 
 
                 # Print message
-                if hbc == 'y' and '!webmaster' in message or '!bug' in message or '!chatbot' in message or '/post' in message:
+                if hbc == 'y' and '!webmaster' in message  or '!bug' in message or '!chatbot' in message: # or '!bug' in message or '!chatbot' in message or '/post' in message
                     continue
                 elif message == '!usetaken '+ my_username:
                     print('That username is taken.')
@@ -320,6 +320,8 @@ while True:
                     client_socket.send(message_header + message)
                     exit()
                 elif username == 'enc_distr' or '!req' in message:
+                    continue
+                elif '/post ' in message and username != 'Forum post manager':
                     continue
                 elif '!file^^^' in message:
                     continue
