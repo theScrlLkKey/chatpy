@@ -89,7 +89,7 @@ if load == 'y' or load == '':
 
 
 else:    
-    IP = str(input('Ip Address/hostname: '))
+    IP = str(input('IP Address/hostname: '))
     while True:
         try:
             PORT = int(input('Port: '))
@@ -125,7 +125,7 @@ while True:
         break
     except:
         print('Error connecting to server. Check ip and port and try again.')
-        IP = str(input('Ip Address: '))
+        IP = str(input('IP Address: '))
         while True:
             try:
                 PORT = int(input('Port: '))
@@ -438,6 +438,9 @@ while True:
 
                 elif '!< ' in message:
                     print(f'{print_time_str} |​⃰ {username} {message.split("!< ")[1]}')
+
+                elif '!me ' in message:
+                    print(f'{print_time_str} |​⃰ {username} {message.split("!me ")[1]}')
 
                 elif 'joined the chat!' in message or 'left the chat!' in message:
                     print(f'{print_time_str} |Server{sep} {message}')
