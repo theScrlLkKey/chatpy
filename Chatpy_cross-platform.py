@@ -5,6 +5,7 @@ import urllib.request
 import subprocess
 import sys
 
+## todo add enter after exit
 
 def install(package):
     subprocess.check_call([sys.executable, "-m", "pip", "install", package])
