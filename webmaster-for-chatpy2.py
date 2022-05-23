@@ -40,8 +40,8 @@ chttop = 'Everything :)'
 uservar = ['Webmaster, ']
 about = """
 Hi. I'm Decky. The guy who made this thing. This chat program was made in python 3 with socket.
-Source code for the server, client, and bot is available over at http://lightos.ddns.net/downloads.
-On this server we have the Webmaster and Chatbot, both of which I made myself.
+Source code for the server, client, and bots are available over at http://lightos.ddns.net/downloads. (not currently active, replace with github)
+On this server we have Webmaster, Chatbot, and the forum bot, both of which I made myself.
 If you want to learn more about Chatbot do !.chatbot about.
 If you want to report a bug, do !.bug report <problem here> and I will get to it asap!
 Have fun and be sure to do !.webmaster rules to see the rules!
@@ -50,37 +50,7 @@ Note: the server and client were made in two days as a side project so there wil
 Note 2: to run the above commands, omit the . from the beginning of the command.
 """
 rules = """
-Rule 0.5: always copy your rules from a bigger platform.
-
-Rule 0.8: find that irc, the only big platform like yours, doesn't have any real rules.
-
-Rule 0.85: give up and write your own rules.
-
-Rule 1: Don't spam. Chatbot doesn't like it, and neither do I.
-
-Rule 2: Don't use Unicode characters/emojis, please.  The server finds that annoying (and Chatbot does too).
-
-Rule 3: I know swearing is fun, but Chatbot is young and we don't want to teach him curses quite yet. 
-
-Rule 4: Don't annoy people on purpose. You WILL get tempbanned.
-
-Rule 5: Chatbot gets reset every time I have to reset the server due to crashes, and everyone gets kicked. Please don't purposefully crash the server.
-
-Rule 6: If/when the server crashes and has to restart, teach Chatbot this link: https://www.youtube.com/watch?v=dQw4w9WgXcQ (please don't this is a joke lol)
-
-Rule 7: Stop reading these immediately and go have fun!
-
-Rule 8: I said stop.
-
-Rule 9: No.
-
-Rule 10: STOP!
-
-Rule 11: DON'T READ ANY FURTHER!
-
-Rule 12: DON'T DO ITTTTTTTTTTT
-
-Rule 13: lol
+<rules removed for sounding stupid, don't be mean or something>
 """
 
 HEADER_LENGTH = 10
