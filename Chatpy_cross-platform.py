@@ -5,7 +5,7 @@ import urllib.request
 import subprocess
 import sys
 
-## todo add enter after exit
+## todo add enter after exit, change time to hh:mmxm
 
 def install(package):
     subprocess.check_call([sys.executable, "-m", "pip", "install", package])
