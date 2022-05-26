@@ -325,7 +325,7 @@ while True:
                     continue
                 elif message == '!usetaken '+ my_username:
                     print('That username is taken.')
-                    message = my_username + ' was taken. Disconnected'
+                    message = my_username + ' was taken. Disconnected!'
                     message = message.encode('utf-8')
                     message = encrypt(message, key)
                     message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
@@ -338,7 +338,7 @@ while True:
                     continue
                 elif '!file^^^' in message:
                     continue
-                elif username == my_username:
+                elif username == my_username and '!ip ' not in message:
                     print(f'{print_time_str} |Server{sep} {message}')
                     time.sleep(1)
                     message = '!usetaken ' + username
@@ -356,6 +356,8 @@ while True:
                     exit()
                 elif '!ban ' in message:
                     continue
+                elif ' was taken. Disconnected!' in message:
+                    print(f'{print_time_str} |Server{sep} {message}')
                 elif message == '!relog':
                     print(f'Server{sep} Serverwide restart requested')
                     while True:
