@@ -5,7 +5,7 @@ import urllib.request
 import subprocess
 import sys
 
-## todo add enter after exit, change time to hh:mmxm
+
 
 def install(package):
     subprocess.check_call([sys.executable, "-m", "pip", "install", package])
@@ -58,6 +58,7 @@ try:
     ip = urllib.request.urlopen('https://api.ipify.org').read().decode('utf8')
 except:
     print('No internet!')
+    input('Press enter to exit...')
     exit()
 
 IP = '127.0.0.1'
@@ -181,6 +182,7 @@ else:
             # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
             if not len(username_header):
                 print('Connection closed by the server')
+                input('Press enter to exit...')
                 exit()
 
             # Convert header to int value
@@ -216,7 +218,7 @@ while True:
     # Wait for user to input a message
     try:
         named_tuple = time.localtime()  # get struct_time
-        print_time_str = time.strftime("%I:%M:%S %p", named_tuple)
+        print_time_str = time.strftime("%I:%M%p", named_tuple)
 
         named_tuple = time.localtime()  # get struct_time
         curtime = int(time.strftime("%M", named_tuple))
@@ -226,6 +228,7 @@ while True:
             message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
             client_socket.send(message_header + message)
             print('Disconnected. You were idle for too long.')
+            input('Press enter to exit...')
             exit()
 
         message = ''
@@ -253,6 +256,7 @@ while True:
                 # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
                 if not len(username_header):
                     print('Connection closed by the server')
+                    input('Press enter to exit...')
                     exit()
 
                 # Convert header to int value
@@ -292,6 +296,7 @@ while True:
                                 # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
                                 if not len(username_header):
                                     print('Connection closed by the server')
+                                    input('Press enter to exit...')
                                     exit()
 
                                 # Convert header to int value
@@ -325,6 +330,7 @@ while True:
                     message = encrypt(message, key)
                     message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                     client_socket.send(message_header + message)
+                    input('Press enter to exit...')
                     exit()
                 elif username == 'enc_distr' or '!req' in message:
                     continue
@@ -346,6 +352,7 @@ while True:
                     message = message.encode('utf-8')
                     message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                     client_socket.send(message_header + message)
+                    input('Press enter to exit...')
                     exit()
                 elif '!ban ' in message:
                     continue
@@ -359,6 +366,7 @@ while True:
                             # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
                             if not len(username_header):
                                 print('Connection closed by the server')
+                                input('Press enter to exit...')
                                 exit()
 
                             # Convert header to int value
@@ -460,6 +468,7 @@ while True:
             # If we got different error code - something happened
             if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK:
                 print('Reading error: {}'.format(str(e)))
+                input('Press enter to exit...')
                 exit()
 
             # We just did not receive anything
@@ -467,7 +476,8 @@ while True:
 
         except Exception as e:
             # Any other exception - something happened, exit
-            #print('Reading error: '.format(str(e)))
+            print('Error: '.format(str(e)))
+            input('Press enter to exit...')
             exit()
     except KeyboardInterrupt:
         try:
@@ -499,6 +509,7 @@ while True:
                         # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
                         if not len(username_header):
                             print('Connection closed by the server')
+                            input('Press enter to exit...')
                             exit()
 
                         # Convert header to int value
@@ -535,6 +546,7 @@ while True:
                         # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
                         if not len(username_header):
                             print('Connection closed by the server')
+                            input('Press enter to exit...')
                             exit()
 
                         # Convert header to int value
@@ -594,6 +606,7 @@ while True:
                             # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
                             if not len(username_header):
                                 print('Connection closed by the server')
+                                input('Press enter to exit...')
                                 exit()
 
                             # Convert header to int value
