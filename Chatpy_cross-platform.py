@@ -450,8 +450,8 @@ while True:
                 elif '!< ' in message:
                     print(f'{print_time_str} |​⃰ {username} {message.split("!< ")[1]}')
 
-                elif '!me ' in message:
-                    print(f'{print_time_str} |​⃰ {username} {message.split("!me ")[1]}')
+                elif '/me ' in message:
+                    print(f'{print_time_str} |​⃰ {username} {message.split("/me ")[1]}')
 
                 elif 'joined the chat!' in message or 'left the chat!' in message:
                     print(f'{print_time_str} |Server{sep} {message}')

@@ -53,6 +53,8 @@ rules = """
 <rules removed for sounding stupid, don't be mean or something>
 """
 
+tellls = {}
+
 HEADER_LENGTH = 10
 
 ip = urllib.request.urlopen('https://api.ipify.org').read().decode('utf8')
@@ -176,7 +178,7 @@ while True:
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                 client_socket.send(message_header + message)
             elif message == '!webmaster commands':
-                smessage = f'!msg {username} Commands: greet, name, topic, myname, time, userlist, about, rules, say <thing to say>, math <equation>, randhex, randnum <number of digits>. Put a !.webmaster before any of these commands (remove the . ). Non-webmaster commands: !.msg <username> <message>, !.relog, !.ping, !.< <status>, !.> <username> (remove the . )'
+                smessage = f'!msg {username} Commands: greet, name, topic, myname, time, userlist, about, rules, say <thing to say>, tell <user> <message>, math <equation>, randhex, randnum <number of digits>. Put a !.webmaster before any of these commands (remove the . ). Non-webmaster commands: !.msg <username> <message>, !.relog, !.ping, !.< <status>, !.> <username> (remove the . )'
                 message = smessage.encode('utf-8')
                 message = encrypt(message, key)
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
@@ -302,8 +304,6 @@ Total users online: ''' + str(usercount)
                             time.sleep(0.2)
                             retrys -= 1
 
-
-
             elif message == '!webmaster about':
                 smessage = about
                 message = smessage.encode('utf-8')
@@ -330,8 +330,37 @@ Total users online: ''' + str(usercount)
                 message = encrypt(message, key)
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                 client_socket.send(message_header + message)
+
+            elif '!webmaster tell ' in message:
+                # !webmaster tell User Message
+                try:
+                    named_tuple = time.localtime()  # get struct_time
+                    cutime = time.strftime("%m/%d, %I:%M%p", named_tuple)
+                    nystrip = message.replace('!webmaster tell ', '')
+                    ttuser, ttmessage = nystrip.split(' ', 1)
+                    try:
+                        oldttls = tellls[ttuser]
+                    except:
+                        oldttls = ''
+                    tellls[ttuser] = f'{oldttls}\n{username} at {cutime}: {ttmessage}'
+                    # print(str(tellls))
+                    print(str(tellls.keys()))
+                    # except Exception as err:
+                    #     print(str(err))
+                    smessage = f'Will tell {ttuser}.'
+                    message = smessage.encode('utf-8')
+                    message = encrypt(message, key)
+                    message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+                    client_socket.send(message_header + message)
+                except ValueError:
+                    smessage = f'Cannot send an empty message.'
+                    message = smessage.encode('utf-8')
+                    message = encrypt(message, key)
+                    message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+                    client_socket.send(message_header + message)
+
             elif '!webmaster math ' in message:
-                ttsay = message.strip('!webmaster math ')
+                ttsay = message.strip('!webmaster math abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
                 try:
                     print(ttsay)
                     ttsay = 'ttsay = ' + ttsay
@@ -378,7 +407,7 @@ Total users online: ''' + str(usercount)
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                 client_socket.send(message_header + message)
             elif '!webmaster' in message:
-                smessage = "I know you want something from me, but I'm not sure what."
+                smessage = "I know you want something from me, but I'm not sure what. Try !webmaster commands"
                 message = smessage.encode('utf-8')
                 message = encrypt(message, key)
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
@@ -398,6 +427,14 @@ Total users online: ''' + str(usercount)
             # message = encrypt(message, key)
             # message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
             # client_socket.send(message_header + message)
+
+            elif username in tellls.keys():
+                smessage = f'!msg {username} \nNew tell messages, to reply use !webmaster tell <user> <reply>  {str(tellls[username])}'
+                message = smessage.encode('utf-8')
+                message = encrypt(message, key)
+                message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+                client_socket.send(message_header + message)
+                del tellls[username]
 
             elif message == '!relog':
                 print('Re-authentication requested...')
@@ -430,12 +467,6 @@ Total users online: ''' + str(usercount)
                     except:
                         continue
 
-
-
-
-
-
-
     except IOError as e:
         # This is normal on non blocking connections - when there are no incoming data error is going to be raised
         # Some operating systems will indicate that using AGAIN, and some using WOULDBLOCK error code
@@ -450,60 +481,60 @@ Total users online: ''' + str(usercount)
     except:
         continue
 
-##while True:
-##
-##
-##    message = ''
-##    
-##    
-##
-##    # If message is not empty - send it
-##    if message:
-##
-##        # Encode message to bytes, prepare header and convert to bytes, like for username above, then send
-##        message = message.encode('utf-8')
-##        message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
-##        client_socket.send(message_header + message)
-##
-##    try:
-##        # Now we want to loop over received messages (there might be more than one) and print them
-##        while True:
-##
-##            # Receive our "header" containing username length, it's size is defined and constant
-##            username_header = client_socket.recv(HEADER_LENGTH)
-##
-##            # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
-##            if not len(username_header):
-##                print('Connection closed by the server')
-##                sys.exit()
-##
-##            # Convert header to int value
-##            username_length = int(username_header.decode('utf-8').strip())
-##
-##            # Receive and decode username
-##            username = client_socket.recv(username_length).decode('utf-8')
-##
-##            # Now do the same for message (as we received username, we received whole message, there's no need to check if it has any length)
-##            message_header = client_socket.recv(HEADER_LENGTH)
-##            message_length = int(message_header.decode('utf-8').strip())
-##            message = client_socket.recv(message_length).decode('utf-8')
-##
-##            # Print message
-##            print(f'{username}: {message}')
-##
-##    except IOError as e:
-##        # This is normal on non blocking connections - when there are no incoming data error is going to be raised
-##        # Some operating systems will indicate that using AGAIN, and some using WOULDBLOCK error code
-##        # We are going to check for both - if one of them - that's expected, means no incoming data, continue as normal
-##        # If we got different error code - something happened
-##        if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK:
-##            print('Reading error: {}'.format(str(e)))
-##            sys.exit()
-##
-##        # We just did not receive anything
-##        continue
-##
-##    except Exception as e:
-##        # Any other exception - something happened, exit
-##        print('Reading error: '.format(str(e)))
-##        sys.exit()
+# while True:
+#
+#
+#    message = ''
+#
+#
+#
+#    # If message is not empty - send it
+#    if message:
+#
+#        # Encode message to bytes, prepare header and convert to bytes, like for username above, then send
+#        message = message.encode('utf-8')
+#        message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+#        client_socket.send(message_header + message)
+#
+#    try:
+#        # Now we want to loop over received messages (there might be more than one) and print them
+#        while True:
+#
+#            # Receive our "header" containing username length, it's size is defined and constant
+#            username_header = client_socket.recv(HEADER_LENGTH)
+#
+#            # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
+#            if not len(username_header):
+#                print('Connection closed by the server')
+#                sys.exit()
+#
+#            # Convert header to int value
+#            username_length = int(username_header.decode('utf-8').strip())
+#
+#            # Receive and decode username
+#            username = client_socket.recv(username_length).decode('utf-8')
+#
+#            # Now do the same for message (as we received username, we received whole message, there's no need to check if it has any length)
+#            message_header = client_socket.recv(HEADER_LENGTH)
+#            message_length = int(message_header.decode('utf-8').strip())
+#            message = client_socket.recv(message_length).decode('utf-8')
+#
+#            # Print message
+#            print(f'{username}: {message}')
+#
+#    except IOError as e:
+#        # This is normal on non blocking connections - when there are no incoming data error is going to be raised
+#        # Some operating systems will indicate that using AGAIN, and some using WOULDBLOCK error code
+#        # We are going to check for both - if one of them - that's expected, means no incoming data, continue as normal
+#        # If we got different error code - something happened
+#        if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK:
+#            print('Reading error: {}'.format(str(e)))
+#            sys.exit()
+#
+#        # We just did not receive anything
+#        continue
+#
+#    except Exception as e:
+#        # Any other exception - something happened, exit
+#        print('Reading error: '.format(str(e)))
+#        sys.exit()
