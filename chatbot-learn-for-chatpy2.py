@@ -48,23 +48,11 @@ def getStr(t):
         t=t-1
     a = a + random.choice(stuffToSay) + '.'
     return a
-    
-
-    
-
-    
-
 
 
 HEADER_LENGTH = 10
 
-
-
 ip = urllib.request.urlopen('https://api.ipify.org').read().decode('utf8')
-
-
-
-
 
 #IP = str(input('Ip Address: '))
 #PORT = int(input('Port(Must be a number): '))
@@ -205,7 +193,12 @@ while True:
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                 client_socket.send(message_header + message)
 
-
+            elif message == '!chkusr':
+                smessage = '!chkusrback'
+                message = smessage.encode('utf-8')
+                message = encrypt(message, key)
+                message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+                client_socket.send(message_header + message)
 
             
             talk = random.randint(1,2)

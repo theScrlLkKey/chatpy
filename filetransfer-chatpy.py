@@ -103,7 +103,7 @@ if load == 'y' or load == '':
 
 
 else:    
-    IP = str(input('Ip Address/hostname: '))
+    IP = str(input('IP Address/hostname: '))
     while True:
         try:
             PORT = int(input('Port: '))

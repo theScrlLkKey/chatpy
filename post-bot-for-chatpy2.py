@@ -300,9 +300,12 @@ while True:
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                 client_socket.send(message_header + message)
 
-
-
-
+            elif message == '!chkusr':
+                smessage = '!chkusrback'
+                message = smessage.encode('utf-8')
+                message = encrypt(message, key)
+                message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+                client_socket.send(message_header + message)
 
 
 

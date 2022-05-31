@@ -291,9 +291,8 @@ while True:
                             # print(userlst)
                             # rtrys = rtrys - 1
                             # if rtrys < 0:
-                            userlst += '''
-Total users online: ''' + str(usercount)
-                            smessage = '!msg ' + ogusername + ' ' + userlst
+                            userlst += ''' | Total users online: ''' + str(usercount)
+                            smessage = 'Users online: ' + userlst # '!msg ' + ogusername + ' ' +
                             # print(smessage)
                             message = smessage.encode('utf-8')
                             message = encrypt(message, key)

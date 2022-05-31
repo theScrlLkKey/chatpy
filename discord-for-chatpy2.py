@@ -67,7 +67,7 @@ while True:
         PORT = int(input('Port(Must be a number): '))
 
 print('Connected!')
-my_username = 'Discord integration'
+my_username = 'Discord bridge'
 
 # Set connection to non-blocking state, so .recv() call won;t block, just return some exception we'll handle
 client_socket.setblocking(False)
@@ -153,6 +153,12 @@ while True:
                 continue
             elif '@everyone' in message:
                 continue
+            elif message == '!chkusr':
+                smessage = '!chkusrback'
+                message = smessage.encode('utf-8')
+                message = encrypt(message, key)
+                message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+                client_socket.send(message_header + message)
             else:
                 print(f'<{username}> {message}')
                 keyboard.write(f'<{username}> {message}\n')
