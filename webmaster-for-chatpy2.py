@@ -178,7 +178,7 @@ while True:
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                 client_socket.send(message_header + message)
             elif message == '!webmaster commands':
-                smessage = f'!msg {username} Commands: greet, name, topic, myname, time, userlist, about, rules, say <thing to say>, tell <user> <message>, math <equation>, randhex, randnum <number of digits>. Put a !.webmaster before any of these commands (remove the . ). Non-webmaster commands: !.msg <username> <message>, !.relog, !.ping, !.< <status>, !.> <username> (remove the . )'
+                smessage = f'!msg {username} Commands: greet, name, topic, myname, time, userlist, about, rules, say <thing to say>, tell <user> <message>, math <equation>, randhex, randnum <number of digits>. Put !webmaster before any of these commands. Non-webmaster commands: !msg <username> <message>, !.relog (remove dot), !ping, !.< <status> (remove dot), !.> <username> (remove dot)'
                 message = smessage.encode('utf-8')
                 message = encrypt(message, key)
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
