@@ -8,6 +8,8 @@ import os
 import struct
 import binascii
 
+# todo add pause and error checking, zip files before send
+
 def rawbytes(s):
     """Convert a string to raw bytes without encoding"""
     outlist = []
