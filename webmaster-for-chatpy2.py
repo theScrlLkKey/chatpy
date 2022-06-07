@@ -53,6 +53,11 @@ rules = """
 <rules removed for sounding stupid, don't be mean or something>
 """
 
+rot13 = str.maketrans(
+    'ABCDEFGHIJKLMabcdefghijklmNOPQRSTUVWXYZnopqrstuvwxyz',
+    'NOPQRSTUVWXYZnopqrstuvwxyzABCDEFGHIJKLMabcdefghijklm')
+
+
 tellls = {}
 
 HEADER_LENGTH = 10
@@ -178,7 +183,7 @@ while True:
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                 client_socket.send(message_header + message)
             elif message == '!webmaster commands':
-                smessage = f'!msg {username} Commands: greet, name, topic, myname, time, userlist, about, rules, say <thing to say>, tell <user> <message>, math <equation>, randhex, randnum <number of digits>. Put !webmaster before any of these commands. Non-webmaster commands: !msg <username> <message>, !.relog (remove dot), !ping, !.< <status> (remove dot), !.> <username> (remove dot)'
+                smessage = f'!msg {username} Commands: greet, name, topic, myname, time, userlist, about, rules, say <thing to say>, tell <user> <message>, math <equation>, randhex, randnum <number of digits>, rot13 <message>. Put !webmaster before any of these commands. Non-webmaster commands: !msg <username> <message>, !.relog (remove dot), !ping, !.< <status> (remove dot), !.> <username> (remove dot)'
                 message = smessage.encode('utf-8')
                 message = encrypt(message, key)
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
@@ -322,6 +327,13 @@ while True:
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                 client_socket.send(message_header + message)
                 setup()
+            elif '!webmaster rot13' in message:
+                ttsay = message.replace('!webmaster rot13 ', '')
+                smessage = ttsay.translate(rot13)
+                message = smessage.encode('utf-8')
+                message = encrypt(message, key)
+                message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+                client_socket.send(message_header + message)
             elif '!webmaster say ' in message:
                 ttsay = message.replace('!webmaster say ', '')
                 smessage = ttsay
