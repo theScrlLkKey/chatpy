@@ -15,19 +15,30 @@ try:
     from cryptography.fernet import Fernet
 except ModuleNotFoundError:
     doinst = input('"cryptography" module not found. Would you like to install it now? (Y/n) ').lower()
-    if doinst == 'y':
-     install('cryptography')
+    if doinst == 'y' or doinst == '':
+        install('cryptography')
     else:
         input('Please install "cryptography". Press enter to exit...')
+        exit()
 
 try:
     from pythonping import ping
 except ModuleNotFoundError:
     doinst = input('"pythonping" module not found. Would you like to install it now? (Y/n) ').lower()
-    if doinst == 'y':
-     install('pythonping')
+    if doinst == 'y' or doinst == '':
+        install('pythonping')
     else:
         input('Please install "pythonping". Press enter to exit...')
+        exit()
+
+try:
+    from pynput import keyboard
+except ModuleNotFoundError:
+    doinst = input('"pynput" module not found. Would you like to install it now? (Y/n) ').lower()
+    if doinst == 'y' or doinst == '':
+        install('pynput')
+    else:
+        input('To use modern input handler, please install "pynput". Press enter...')
 
 
 def encrypt(message, key):
@@ -61,6 +72,181 @@ def intping(destToPing):
     return ptime
 
 
+# there is definitely a better way to do the following bit of code, but i cant think of it currently. belive me tho, i dont want to do it like this
+def get_sendmsg():
+    # im sorry programming gods
+    global key
+    global sttime
+    global stimef
+    global message
+    global username
+    global usrstatus
+    global trytoreauth
+    global named_tuple
+    global message_header
+    global message_length
+    global username_header
+    global username_length
+
+    message = input(f'{print_time_str} |{my_username}{sep} ')
+    senmessage = message
+    if message == 'exit' or message == 'Exit':
+        if stlent == 'y':
+            # ?
+            dummy_var = 1
+        else:
+            message = my_username + ' has left the chat!'
+            message = message.encode('utf-8')
+            message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+            client_socket.send(message_header + message)
+        exit()
+    if message == '!erelog':
+        message = '!relog'
+        message = message.encode('utf-8')
+
+        message = encrypt(message, key)
+        message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+
+        client_socket.send(message_header + message)
+        print(f'Server{sep} Serverwide restart requested')
+        while True:
+            try:
+                # Receive our "header" containing username length, it's size is defined and constant
+                username_header = client_socket.recv(HEADER_LENGTH)
+
+                # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
+                if not len(username_header):
+                    print('Connection closed by the server')
+                    input('Press enter to exit...')
+                    exit()
+
+                # Convert header to int value
+                username_length = int(username_header.decode('utf-8').strip())
+
+                # Receive and decode username
+                username = client_socket.recv(username_length).decode('utf-8')
+
+                # Now do the same for message (as we received username, we received whole message, there's no need to check if it has any length)
+                message_header = client_socket.recv(HEADER_LENGTH)
+                message_length = int(message_header.decode('utf-8').strip())
+                message = client_socket.recv(message_length).decode('utf-8')
+                if username == 'enc_distr':
+                    key = message
+                    print(f'Server{sep} Restart complete')
+                    break
+                else:
+                    continue
+            except:
+                continue
+    elif message == '!relog':
+        message = '!erelog'
+        message = message.encode('utf-8')
+
+        message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+
+        client_socket.send(message_header + message)
+        print(f'Server{sep} Restart requested')
+        while True:
+            try:
+                # Receive our "header" containing username length, it's size is defined and constant
+                username_header = client_socket.recv(HEADER_LENGTH)
+
+                # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
+                if not len(username_header):
+                    print('Connection closed by the server')
+                    input('Press enter to exit...')
+                    exit()
+
+                # Convert header to int value
+                username_length = int(username_header.decode('utf-8').strip())
+
+                # Receive and decode username
+                username = client_socket.recv(username_length).decode('utf-8')
+
+                # Now do the same for message (as we received username, we received whole message, there's no need to check if it has any length)
+                message_header = client_socket.recv(HEADER_LENGTH)
+                message_length = int(message_header.decode('utf-8').strip())
+                message = client_socket.recv(message_length).decode('utf-8')
+                if username == 'enc_distr':
+                    key = message
+                    print(f'Server{sep} Restart complete')
+                    break
+                else:
+                    continue
+            except:
+                continue
+
+    elif message == '!ping':
+        print('Server' + sep + ' Your ping is ' + str(intping(IP)) + 'ms.')
+
+    # If message is not empty - send it
+    elif message:
+        if '!<' in message:
+            usrstatus = message.split(' ', 1)[1]
+            print(f'Status set to: {my_username} {usrstatus}')
+
+        elif message == '/post list':
+            message = '/post list_int'
+        elif message == '/post new':
+            title = input('Post title: ')
+            post = input('Write post:\n')
+            message = f'/post new {post} ;;; {title}'
+        # Encode message to bytes, prepare header and convert to bytes, like for username above, then send
+        message = message.encode('utf-8')
+        try:
+            message = encrypt(message, key)
+        except:
+            print(f'Server{sep} Message failed to send. Refreshing encryption key.')
+            message = '!erelog'
+            message = message.encode('utf-8')
+
+            message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+
+            client_socket.send(message_header + message)
+            # print('Re-authentication requested...')
+            trytoreauth = 10
+            while True:
+                trytoreauth -= 1
+                try:
+                    # Receive our "header" containing username length, it's size is defined and constant
+                    username_header = client_socket.recv(HEADER_LENGTH)
+
+                    # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
+                    if not len(username_header):
+                        print('Connection closed by the server')
+                        input('Press enter to exit...')
+                        exit()
+
+                    # Convert header to int value
+                    username_length = int(username_header.decode('utf-8').strip())
+
+                    # Receive and decode username
+                    username = client_socket.recv(username_length).decode('utf-8')
+
+                    # Now do the same for message (as we received username, we received whole message, there's no need to check if it has any length)
+                    message_header = client_socket.recv(HEADER_LENGTH)
+                    message_length = int(message_header.decode('utf-8').strip())
+                    message = client_socket.recv(message_length).decode('utf-8')
+                    if username == 'enc_distr':
+                        key = message
+                        print(f'Server{sep} Key refreshed')
+                        message = encrypt(message, key)
+                        break
+                    else:
+                        continue
+                except:
+                    continue
+
+        message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+
+        client_socket.send(message_header + message)
+
+        named_tuple = time.localtime()  # get struct_time
+        stimef = int(time.strftime("%M", named_tuple))
+        sttime = stimef
+        sttime += 360
+
+
 path = 'config.txt'
 
 HEADER_LENGTH = 10
@@ -77,12 +263,14 @@ PORT = 1234
 stlent = ''
 sep = ':'
 hbc = ''
+sendm = 'm'
+shct = 'Tab + Space'
 
 
 #print('Starting chatpy now...')
 #time.sleep(1)
 
-load = input('Load config from last time? (Y/n)').lower()
+load = input('Load config from last time? (Y/n): ').lower()
 if load == 'y' or load == '':
     try:
 
@@ -93,12 +281,12 @@ if load == 'y' or load == '':
         print('No config file found. Loading defaults...')
         with open(path, 'w+') as data:
             data.write("""
-        IP = '""" + str(IP) + """'
-        PORT = """ + str(PORT) + """
-        sep = '""" + str(sep) + """'
-        stlent = '""" + str(stlent) + """' 
-        hbc = '""" + str(hbc) + "'")
-
+IP = '""" + str(IP) + """'
+PORT = """ + str(PORT) + """
+sep = '""" + str(sep) + """'
+stlent = '""" + str(stlent) + """' 
+hbc = '""" + str(hbc) + """' 
+sendm = '""" + str(sendm) + "'")
 
 
 else:    
@@ -110,8 +298,11 @@ else:
         except:
             print('Port must be a number.')
         
-    sep = input('Separator between username and message(Eg. Tim>> hi or Tim: hi): ')
-    hbc = input('Hide (most) bot commands? (y/N)').lower()
+    sep = input('Separator between username and message (Eg. Tim>> hi or Tim: hi): ')
+    sendm = input('Use modern (ctrl+shift) or legacy (ctrl+c, may break on Windows) shortcut to enter send mode? (M/l): ').lower()
+    if sendm == '':
+        sendm = 'm'
+    hbc = input('Hide (most) bot commands? (y/N): ').lower()
 #    stlent = input('Stealth entry/exit? Not supported on servers running webmaster. (y/N)') i am removing this because reasons.  thnik about it.
     stlent = ''
     with open(path,'w+') as data:
@@ -120,8 +311,8 @@ IP = '"""+str(IP)+"""'
 PORT = """+str(PORT)+"""
 sep = '"""+str(sep)+"""'
 stlent = '"""+str(stlent)+"""' 
-hbc = '"""+str(hbc)+"'")
-
+hbc = '"""+str(hbc) + """' 
+sendm = '""" + str(sendm) + "'")
 
 #my_username = input("Username: ")
 
@@ -153,8 +344,14 @@ sep = '"""+str(sep)+"""'
 stlent = '"""+str(stlent)+"""'
 hbc = '"""+str(hbc)+"'")
         
+hotkey_active = False
 
-print('Connected to '+IP+':'+str(PORT)+' (Ping: '+str(intping(IP))+'ms)! Press Ctrl + C to talk, use !msg <username> <message here> to send a private mesage, and type exit to quit.')
+if sendm == 'm':
+    shct = 'Ctrl + Shift'
+elif sendm == 'l':
+    shct = 'Ctrl + C'
+
+print('Connected to '+IP+':'+str(PORT)+' (Ping: '+str(intping(IP))+f'ms)! Press {shct} to talk, use !msg <username> <message> to send a private mesage, and type exit to quit.')
 my_username = input("Username: ")
 my_username = my_username.replace(' ', '_')
 
@@ -222,9 +419,29 @@ else:
 
 
 usrstatus = ''
+
+# init keyboard listener
+if sendm == 'm':
+    def on_activate():
+        # OH MY GOD AAAA
+        global hotkey_active
+        hotkey_active = True
+
+
+    def for_canonical(f):
+        return lambda k: f(l.canonical(k))
+
+
+    hotkey = keyboard.HotKey({keyboard.Key.ctrl, keyboard.Key.shift}, on_activate)
+
+    l = keyboard.Listener(
+        on_press=for_canonical(hotkey.press),
+        on_release=for_canonical(hotkey.release))
+    l.start()
+else:
+    pass
+
 while True:
-
-
 
     # Wait for user to input a message
     try:
@@ -256,6 +473,10 @@ while True:
             message = encrypt(message, key)
             message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
             client_socket.send(message_header + message)
+
+        if hotkey_active:
+            get_sendmsg()
+            hotkey_active = False
 
         try:
             # Now we want to loop over received messages (there might be more than one) and print them
@@ -470,9 +691,6 @@ while True:
                 else:
                     print(f'{print_time_str} |{username}{sep} {message}')
 
-                # add time
-
-
 
         except IOError as e:
             # This is normal on non blocking connections - when there are no incoming data error is going to be raised
@@ -492,164 +710,13 @@ while True:
             print('Error: '.format(str(e)))
             input('Press enter to exit...')
             exit()
-    except KeyboardInterrupt:
+
+    except KeyboardInterrupt: # legacy input handler
         try:
-            message = input(f'{print_time_str} |{my_username}{sep} ')
-            senmessage = message
-            if message == 'exit' or message == 'Exit':
-                if stlent == 'y':
-                    dummy_var = 1
-                else:
-                    message = my_username + ' has left the chat!'
-                    message = message.encode('utf-8')
-                    message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
-                    client_socket.send(message_header + message)
-                exit()
-            if message == '!erelog':
-                message ='!relog'
-                message = message.encode('utf-8')
-
-                message = encrypt(message, key)
-                message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
-
-                client_socket.send(message_header + message)
-                print(f'Server{sep} Serverwide restart requested')
-                while True:
-                    try:
-                        # Receive our "header" containing username length, it's size is defined and constant
-                        username_header = client_socket.recv(HEADER_LENGTH)
-
-                        # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
-                        if not len(username_header):
-                            print('Connection closed by the server')
-                            input('Press enter to exit...')
-                            exit()
-
-                        # Convert header to int value
-                        username_length = int(username_header.decode('utf-8').strip())
-
-                        # Receive and decode username
-                        username = client_socket.recv(username_length).decode('utf-8')
-
-                        # Now do the same for message (as we received username, we received whole message, there's no need to check if it has any length)
-                        message_header = client_socket.recv(HEADER_LENGTH)
-                        message_length = int(message_header.decode('utf-8').strip())
-                        message = client_socket.recv(message_length).decode('utf-8')
-                        if username == 'enc_distr':
-                            key = message
-                            print(f'Server{sep} Restart complete')
-                            break
-                        else:
-                            continue
-                    except:
-                        continue
-            elif message == '!relog':
-                message = '!erelog'
-                message = message.encode('utf-8')
-
-                message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
-
-                client_socket.send(message_header + message)
-                print(f'Server{sep} Restart requested')
-                while True:
-                    try:
-                        # Receive our "header" containing username length, it's size is defined and constant
-                        username_header = client_socket.recv(HEADER_LENGTH)
-
-                        # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
-                        if not len(username_header):
-                            print('Connection closed by the server')
-                            input('Press enter to exit...')
-                            exit()
-
-                        # Convert header to int value
-                        username_length = int(username_header.decode('utf-8').strip())
-
-                        # Receive and decode username
-                        username = client_socket.recv(username_length).decode('utf-8')
-
-                        # Now do the same for message (as we received username, we received whole message, there's no need to check if it has any length)
-                        message_header = client_socket.recv(HEADER_LENGTH)
-                        message_length = int(message_header.decode('utf-8').strip())
-                        message = client_socket.recv(message_length).decode('utf-8')
-                        if username == 'enc_distr':
-                            key = message
-                            print(f'Server{sep} Restart complete')
-                            break
-                        else:
-                            continue
-                    except:
-                        continue
-                
-            elif message == '!ping':
-                print('Server'+sep+' Your ping is '+str(intping(IP))+'ms.')
-
-            # If message is not empty - send it
-            elif message:
-                if '!<' in message:
-                    usrstatus = message.split(' ', 1)[1]
-                    print(f'Status set to: {my_username} {usrstatus}')
-
-                elif message == '/post list':
-                    message = '/post list_int'
-                elif message == '/post new':
-                    title = input('Post title: ')
-                    post = input('Write post:\n')
-                    message = f'/post new {post} ;;; {title}'
-                # Encode message to bytes, prepare header and convert to bytes, like for username above, then send
-                message = message.encode('utf-8')
-                try:
-                    message = encrypt(message, key)
-                except:
-                    print(f'Server{sep} Message failed to send. Refreshing encryption key.')
-                    message = '!erelog'
-                    message = message.encode('utf-8')
-
-                    message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
-
-                    client_socket.send(message_header + message)
-                    #print('Re-authentication requested...')
-                    trytoreauth = 10
-                    while True:
-                        trytoreauth -= 1
-                        try:
-                            # Receive our "header" containing username length, it's size is defined and constant
-                            username_header = client_socket.recv(HEADER_LENGTH)
-
-                            # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
-                            if not len(username_header):
-                                print('Connection closed by the server')
-                                input('Press enter to exit...')
-                                exit()
-
-                            # Convert header to int value
-                            username_length = int(username_header.decode('utf-8').strip())
-
-                            # Receive and decode username
-                            username = client_socket.recv(username_length).decode('utf-8')
-
-                            # Now do the same for message (as we received username, we received whole message, there's no need to check if it has any length)
-                            message_header = client_socket.recv(HEADER_LENGTH)
-                            message_length = int(message_header.decode('utf-8').strip())
-                            message = client_socket.recv(message_length).decode('utf-8')
-                            if username == 'enc_distr':
-                                key = message
-                                print(f'Server{sep} Key refreshed')
-                                message = encrypt(message, key)
-                                break
-                            else:
-                                continue
-                        except:
-                            continue
-
-                message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
-
-                client_socket.send(message_header + message)
-
-                named_tuple = time.localtime()  # get struct_time
-                stimef = int(time.strftime("%M", named_tuple))
-                sttime = stimef
-                sttime += 360
+            if sendm == 'l':
+                get_sendmsg()
+            else:
+                continue
         except:
             print('')
 
