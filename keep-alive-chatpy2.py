@@ -4,7 +4,7 @@ import time
 import urllib.request
 from cryptography.fernet import Fernet
 
-# idiotic fix to idiotic problem, host im using closes connections after 10 minutes of inactivity so we do !chkusr to ping everything, if this bot goes down everything will break, its like the authentication bot sp maybe someday it will be integrated into the server
+# idiotic fix to idiotic problem, host im using closes connections after 10 minutes of inactivity so we do !msg to ping everything, if this bot goes down everything will break, its like the authentication bot sp maybe someday it will be integrated into the server
 
 
 def encrypt(message, key):
@@ -109,12 +109,13 @@ while True:
     try:
         # I HATE THIS
         while True:
-            smessage = '!chkusr'
+            smessage = '!msg ' # change to !chkusr to ask for reply
             message = smessage.encode('utf-8')
             message = encrypt(message, key)
             message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
             client_socket.send(message_header + message)
-            time.sleep(360)
+            print('pinged')
+            time.sleep(300)
 
 
     except IOError as e:
