@@ -27,6 +27,16 @@ jobs:
         pip install ordered-set
     - name: Compile
       run: |
-        nuitka --standalone --onefile Chatpy_cross-platform.py
+        nuitka --standalone --onefile --assume-yes-for-downloads Chatpy_cross-platform.py
+        
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v3.1.0
+      with:
+        # Artifact name
+        name: Chatpy standalone EXE
+        # A file, directory or wildcard pattern that describes what to upload
+        path: Chatpy_cross-platform.exe
+        # The desired behavior if no files are found using the provided path.
+        retention-days: 90
 
 
