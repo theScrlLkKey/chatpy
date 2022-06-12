@@ -9,15 +9,27 @@ import sys
 
 def install(package):
     subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+
+
 try:
     from cryptography.fernet import Fernet
-except:
-    print('Fetching requirements...')
-    install ('cryptography')
+except ModuleNotFoundError:
+    doinst = input('"cryptography" module not found. Would you like to install it now? (Y/n) ').lower()
+    if doinst == 'y':
+     install('cryptography')
+    else:
+        input('Please install "cryptography". Press enter to exit...')
+
 try:
     from pythonping import ping
-except:
-    install ('pythonping')
+except ModuleNotFoundError:
+    doinst = input('"pythonping" module not found. Would you like to install it now? (Y/n) ').lower()
+    if doinst == 'y':
+     install('pythonping')
+    else:
+        input('Please install "pythonping". Press enter to exit...')
+
+
 def encrypt(message, key):
     """
     Given a filename (str) and key (bytes), it encrypts the file and write it
@@ -28,7 +40,8 @@ def encrypt(message, key):
 
 
     encrypted_data = f.encrypt(file_data)
-    return(encrypted_data)
+    return encrypted_data
+
 
 def decrypt(encrypted_data, key):
     """
@@ -37,18 +50,16 @@ def decrypt(encrypted_data, key):
 
     f = Fernet(key)
 
-
     decrypted_data = f.decrypt(encrypted_data)
-    return(decrypted_data)
+    return decrypted_data
 
 
-
-def ping(destToPing):
-    from pythonping import ping
+def intping(destToPing):
     # destToPing = 'www.google.com'
     response_list = ping(destToPing, size=40, count=8)
     ptime = response_list.rtt_avg_ms
-    return(ptime)
+    return ptime
+
 
 path = 'config.txt'
 
@@ -71,7 +82,7 @@ hbc = ''
 #print('Starting chatpy now...')
 #time.sleep(1)
 
-load = input('Load config from last time? (Y/n)')
+load = input('Load config from last time? (Y/n)').lower()
 if load == 'y' or load == '':
     try:
 
@@ -100,7 +111,7 @@ else:
             print('Port must be a number.')
         
     sep = input('Separator between username and message(Eg. Tim>> hi or Tim: hi): ')
-    hbc = input('Hide (most) bot commands? (y/N)')
+    hbc = input('Hide (most) bot commands? (y/N)').lower()
 #    stlent = input('Stealth entry/exit? Not supported on servers running webmaster. (y/N)') i am removing this because reasons.  thnik about it.
     stlent = ''
     with open(path,'w+') as data:
@@ -143,7 +154,7 @@ stlent = '"""+str(stlent)+"""'
 hbc = '"""+str(hbc)+"'")
         
 
-print('Connected to '+IP+':'+str(PORT)+' (Ping: '+str(ping(IP))+'ms)! Press Ctrl + C to talk, use !msg <username> <message here> to send a private mesage, and type exit to quit.')
+print('Connected to '+IP+':'+str(PORT)+' (Ping: '+str(intping(IP))+'ms)! Press Ctrl + C to talk, use !msg <username> <message here> to send a private mesage, and type exit to quit.')
 my_username = input("Username: ")
 my_username = my_username.replace(' ', '_')
 
@@ -571,7 +582,7 @@ while True:
                         continue
                 
             elif message == '!ping':
-                print('Server'+sep+' Your ping is '+str(ping(IP))+'ms.')
+                print('Server'+sep+' Your ping is '+str(intping(IP))+'ms.')
 
             # If message is not empty - send it
             elif message:
