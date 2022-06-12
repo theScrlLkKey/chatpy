@@ -328,7 +328,7 @@ while True:
         client_socket.connect((IP, PORT))
         break
     except:
-        print('Error connecting to server. Check ip and port and try again.')
+        print('Error connecting to server. Check IP/port and try again.')
         IP = str(input('IP Address: '))
         while True:
             try:
