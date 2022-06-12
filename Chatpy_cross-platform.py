@@ -341,8 +341,9 @@ while True:
 IP = '"""+str(IP)+"""'
 PORT = """+str(PORT)+"""
 sep = '"""+str(sep)+"""'
-stlent = '"""+str(stlent)+"""'
-hbc = '"""+str(hbc)+"'")
+stlent = '"""+str(stlent)+"""' 
+hbc = '"""+str(hbc) + """' 
+sendm = '""" + str(sendm) + "'")
         
 hotkey_active = False
 
