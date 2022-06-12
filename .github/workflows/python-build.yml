@@ -7,6 +7,7 @@ on:
   pull_request:
       paths:
       - 'Chatpy_cross-platform.py'
+  workflow_dispatch:
 
 permissions:
   contents: read
