@@ -106,7 +106,7 @@ while True:
         continue
 
 named_tuple = time.localtime()  # get struct_time
-sttime = int(time.strftime("%I", named_tuple))
+sttime = int(time.strftime("%H", named_tuple))
 
 while True:
     try:
@@ -142,7 +142,7 @@ while True:
                     continue
 
             named_tuple = time.localtime()  # get struct_time
-            cutime = int(time.strftime("%I", named_tuple))
+            cutime = int(time.strftime("%H", named_tuple))
 
             # Print message
             if 'what is tumbleweed' in message.lower():
