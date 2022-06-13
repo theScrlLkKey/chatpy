@@ -120,7 +120,7 @@ while True:
 
             # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
             if not len(username_header):
-                sys.exit()
+                exit()
 
             # Convert header to int value
             username_length = int(username_header.decode('utf-8').strip())
@@ -133,6 +133,7 @@ while True:
             message_header = client_socket.recv(HEADER_LENGTH)
             message_length = int(message_header.decode('utf-8').strip())
             message = client_socket.recv(message_length)
+            ogmessage = message
             if 'joined the chat!' in message.decode('utf-8') or 'left the chat!' in message.decode('utf-8') or '!relog' in message.decode('utf-8') or '!req' in message.decode('utf-8'):
                 message = message.decode('utf-8')
             else:
@@ -147,7 +148,7 @@ while True:
 
             # Print message
             if message == '/post':
-                smessage = f'!msg {username} Hi! I control the forum here. Run "/post new" to post a new submission, "/post list" for all posts (sorted by new), "/post read <post ID>"'
+                smessage = f'!msg {username} Hi! I control the forum here. Run "/post new" to post a new submission, "/post list" for all posts (sorted by new), and "/post read <post ID>" to read a post."'
                 message = smessage.encode('utf-8')
                 message = encrypt(message, key)
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
@@ -307,6 +308,14 @@ while True:
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                 client_socket.send(message_header + message)
 
+            elif 'joined the chat!' in message and 'joined the chat!' in ogmessage.decode('utf-8'):
+                time.sleep(1)
+                smessage = '!msg ' + username + f" Hello {username}! This chatroom has a forum! Run /post for info."
+                message = smessage.encode('utf-8')
+                message = encrypt(message, key)
+                message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+                client_socket.send(message_header + message)
+
 
 
     except IOError as e:
@@ -316,7 +325,7 @@ while True:
         # If we got different error code - something happened
         if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK:
             print('Reading error: {}'.format(str(e)))
-            sys.exit()
+            exit()
 
         # We just did not receive anything
         continue
