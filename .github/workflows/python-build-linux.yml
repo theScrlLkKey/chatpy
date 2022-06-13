@@ -1,0 +1,42 @@
+name: Build for linux
+
+on:
+  push:
+      paths:
+      - 'Chatpy_cross-platform.py'
+  pull_request:
+      paths:
+      - 'Chatpy_cross-platform.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install nuitka ordered-set zstandard pynput pythonping cryptography
+    - name: Compile
+      run: |
+        nuitka --standalone --onefile --assume-yes-for-downloads -o Chatpy_linux.bin Chatpy_cross-platform.py
+        
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v3.1.0
+      with:
+        # Artifact name
+        name: Chatpy_linux
+        # A file, directory or wildcard pattern that describes what to upload
+        path: Chatpy_linux.bin
+        # The desired behavior if no files are found using the provided path.
+        retention-days: 90
