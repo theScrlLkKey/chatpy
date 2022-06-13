@@ -161,6 +161,7 @@ while True:
                 mes_trim = ' '.join(mes_trim)
                 post = mes_trim.split(' ;;; ')[0]
                 title = mes_trim.split(' ;;; ')[1]
+                title = title.strip('<>:"/\|?*')
 
                 named_tuple = time.localtime()  # get struct_time
                 ctime = time.strftime("%I[%M[%p[%m-%d-%Y", named_tuple)
