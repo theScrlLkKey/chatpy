@@ -115,7 +115,7 @@ while True:
             message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
             client_socket.send(message_header + message)
             print('pinged')
-            time.sleep(300)
+            time.sleep(200)
 
 
     except IOError as e:

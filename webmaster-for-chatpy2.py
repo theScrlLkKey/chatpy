@@ -6,6 +6,7 @@ import urllib.request
 import sys
 from cryptography.fernet import Fernet
 import random
+import ast
 
 
 def encrypt(message, key):
@@ -59,6 +60,15 @@ rot13 = str.maketrans(
 
 
 tellls = {}
+
+
+try:
+    with open('tellbk.txt', 'r') as data:
+        tellls = ast.literal_eval(data.read())
+    print('restored backup tells')
+    print(str(tellls))
+except FileNotFoundError:
+    print('no backup tells')
 
 HEADER_LENGTH = 10
 
@@ -134,11 +144,13 @@ while True:
     except:
         continue
 
-##message = my_username + ' (' + ip +')' + ' joined the chat!'
-##
-##message = message.encode('utf-8')
-##message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
-##client_socket.send(message_header + message)
+# message = my_username + ' (' + ip +')' + ' joined the chat!'
+#
+# message = message.encode('utf-8')
+# message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+# client_socket.send(message_header + message)
+
+
 while True:
     try:
         # Now we want to loop over received messages (there might be more than one) and print them
@@ -355,6 +367,8 @@ while True:
                         oldttls = ''
                     tellls[ttuser] = f'{oldttls}\n{username} at {cutime}: {ttmessage}'
                     # print(str(tellls))
+                    with open('tellbk.txt', 'w+') as data:
+                        data.write(str(tellls))
                     print(str(tellls.keys()))
                     # except Exception as err:
                     #     print(str(err))
@@ -369,6 +383,8 @@ while True:
                     message = encrypt(message, key)
                     message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                     client_socket.send(message_header + message)
+                except Exception as err:
+                    print(str(err))
 
             elif '!webmaster math ' in message:
                 ttsay = message.strip('!webmaster math abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
@@ -446,6 +462,8 @@ while True:
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                 client_socket.send(message_header + message)
                 del tellls[username]
+                with open('tellbk.txt', 'w+') as data:
+                    data.write(str(tellls))
 
             elif message == '!relog':
                 print('Re-authentication requested...')

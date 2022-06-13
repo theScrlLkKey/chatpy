@@ -2,43 +2,18 @@ import socket
 import errno
 import time
 import urllib.request
-import subprocess
-import sys
+from cryptography.fernet import Fernet
+from pythonping import ping
+from pynput import keyboard
+import ctypes
 
 
-
-def install(package):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
-
-
-try:
-    from cryptography.fernet import Fernet
-except ModuleNotFoundError:
-    doinst = input('"cryptography" module not found. Would you like to install it now? (Y/n) ').lower()
-    if doinst == 'y' or doinst == '':
-        install('cryptography')
-    else:
-        input('Please install "cryptography". Press enter to exit...')
-        exit()
-
-try:
-    from pythonping import ping
-except ModuleNotFoundError:
-    doinst = input('"pythonping" module not found. Would you like to install it now? (Y/n) ').lower()
-    if doinst == 'y' or doinst == '':
-        install('pythonping')
-    else:
-        input('Please install "pythonping". Press enter to exit...')
-        exit()
-
-try:
-    from pynput import keyboard
-except ModuleNotFoundError:
-    doinst = input('"pynput" module not found. Would you like to install it now? (Y/n) ').lower()
-    if doinst == 'y' or doinst == '':
-        install('pynput')
-    else:
-        input('To use modern input handler, please install "pynput". Press enter...')
+def getWindow():
+    hwnd = ctypes.windll.user32.GetForegroundWindow()
+    length = ctypes.windll.user32.GetWindowTextLengthW(hwnd)
+    buff = ctypes.create_unicode_buffer(length + 1)
+    ctypes.windll.user32.GetWindowTextW(hwnd, buff, length + 1)
+    return buff.value, hwnd
 
 
 def encrypt(message, key):
@@ -263,7 +238,7 @@ PORT = 1234
 stlent = ''
 sep = ':'
 hbc = ''
-sendm = 'l'
+sendm = 'm'
 shct = 'Tab + Space'
 
 
@@ -299,7 +274,7 @@ else:
             print('Port must be a number.')
         
     sep = input('Separator between username and message (Eg. Tim>> hi or Tim: hi): ')
-    sendm = input('Use modern (ctrl+shift) or legacy (ctrl+c, may break on Windows) shortcut to enter send mode? (M/l): ').lower()
+    sendm = input('Use modern (ctrl+shift) or legacy (ctrl+c, NOT SUPPORTED IN THIS VERSION) shortcut to enter send mode? (M/l): ').lower()
     if sendm == '':
         sendm = 'm'
     hbc = input('Hide (most) bot commands? (y/N): ').lower()
@@ -475,7 +450,7 @@ while True:
             message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
             client_socket.send(message_header + message)
 
-        if hotkey_active:
+        if hotkey_active and 'Chatpy_windows' in getWindow():
             get_sendmsg()
             hotkey_active = False
 
@@ -502,7 +477,7 @@ while True:
                 message_header = client_socket.recv(HEADER_LENGTH)
                 message_length = int(message_header.decode('utf-8').strip())
                 message = client_socket.recv(message_length)
-                if 'joined the chat!' in message.decode('utf-8') or 'left the chat!' in message.decode('utf-8') or username == 'enc_distr' or '!usetaken' in message.decode('utf-8') or '!erelog' in message.decode('utf-8')  or '!req' in message.decode('utf-8'):
+                if 'joined the chat!' in message.decode('utf-8') or 'left the chat!' in message.decode('utf-8') or username == 'enc_distr' or '!usetaken' in message.decode('utf-8') or '!erelog' in message.decode('utf-8') or '!req' in message.decode('utf-8'):
                     message = message.decode('utf-8')
                     #print('not')
                 else:
