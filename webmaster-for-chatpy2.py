@@ -387,7 +387,7 @@ while True:
                     print(str(err))
 
             elif '!webmaster math ' in message:
-                ttsay = message.strip('!webmaster math abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
+                ttsay = ''.join(c for c in message if c not in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
                 try:
                     print(ttsay)
                     ttsay = 'ttsay = ' + ttsay
