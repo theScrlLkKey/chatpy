@@ -6,7 +6,9 @@ from cryptography.fernet import Fernet
 from pythonping import ping
 from pynput import keyboard
 import ctypes
-from win10toast import ToastNotifier
+from plyer import notification
+# change back to win10toast when nuitka gets updated
+
 
 
 def getWindow():
@@ -46,8 +48,6 @@ def intping(destToPing):
     response_list = ping(destToPing, size=40, count=8)
     ptime = response_list.rtt_avg_ms
     return ptime
-
-toaster = ToastNotifier()
 
 # there is definitely a better way to do the following bit of code, but i cant think of it currently. belive me tho, i dont want to do it like this
 def get_sendmsg():
@@ -669,7 +669,8 @@ while True:
                 elif f'@{my_username}' in message:
                     print(f'{print_time_str} |{username}{sep} {message}')
                     try:
-                        toaster.show_toast(f'{username} | Chatpy', message, icon_path=None, duration=3, threaded=False)
+                        notification.notify(title=f'{username} | Chatpy', message=message, timeout=3)
+                        # toaster.show_toast(f'{username} | Chatpy', message, icon_path=None, duration=3, threaded=False)
                     except Exception as e:
                         print(e)
                         input('... ')
