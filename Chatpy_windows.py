@@ -13,7 +13,7 @@ def getWindow():
     length = ctypes.windll.user32.GetWindowTextLengthW(hwnd)
     buff = ctypes.create_unicode_buffer(length + 1)
     ctypes.windll.user32.GetWindowTextW(hwnd, buff, length + 1)
-    return buff.value, hwnd
+    return hwnd
 
 
 def encrypt(message, key):
@@ -226,6 +226,9 @@ path = 'config.txt'
 
 HEADER_LENGTH = 10
 
+# get current hwnd hopefully
+curhwnd = getWindow()
+
 try:
     ip = urllib.request.urlopen('https://api.ipify.org').read().decode('utf8')
 except:
@@ -437,8 +440,7 @@ while True:
 
         message = ''
         #time.sleep(0.001)
-        
-        
+
 
         # If message is not empty - send it
         if message:
@@ -450,7 +452,7 @@ while True:
             message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
             client_socket.send(message_header + message)
 
-        if hotkey_active and 'Chatpy_windows' in getWindow():
+        if hotkey_active and getWindow() == curhwnd:
             get_sendmsg()
             hotkey_active = False
 
