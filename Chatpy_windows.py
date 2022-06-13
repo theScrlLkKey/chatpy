@@ -455,6 +455,8 @@ while True:
         if hotkey_active and getWindow() == curhwnd:
             get_sendmsg()
             hotkey_active = False
+        elif hotkey_active:
+            hotkey_active = False
 
         try:
             # Now we want to loop over received messages (there might be more than one) and print them
