@@ -6,7 +6,7 @@ from cryptography.fernet import Fernet
 from pythonping import ping
 from pynput import keyboard
 import ctypes
-from plyer import notification
+import plyer.platforms.win.notification
 # change back to win10toast when nuitka gets updated
 
 
@@ -669,7 +669,7 @@ while True:
                 elif f'@{my_username}' in message:
                     print(f'{print_time_str} |{username}{sep} {message}')
                     try:
-                        notification.notify(title=f'{username} | Chatpy', message=message, timeout=3)
+                        plyer.platforms.win.notification.instance().notify(title=f'{username} | Chatpy', message=message, timeout=3)
                         # toaster.show_toast(f'{username} | Chatpy', message, icon_path=None, duration=3, threaded=False)
                     except Exception as e:
                         print(e)
