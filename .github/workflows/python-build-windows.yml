@@ -3,10 +3,10 @@ name: Build for windows
 on:
   push:
       paths:
-      - 'Chatpy_cross-platform.py'
+      - 'Chatpy_windows.py'
   pull_request:
       paths:
-      - 'Chatpy_cross-platform.py'
+      - 'Chatpy_windows.py'
   workflow_dispatch:
 
 permissions:
@@ -29,7 +29,6 @@ jobs:
         python -m pip install nuitka ordered-set zstandard pynput pythonping cryptography
     - name: Compile
       run: |
-        ren Chatpy_cross-platform.py Chatpy_windows.py 
         python -m nuitka --standalone --assume-yes-for-downloads Chatpy_windows.py
         ren Chatpy_windows.dist Chatpy_windows
         
