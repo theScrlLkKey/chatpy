@@ -114,9 +114,10 @@ while True:
             message = encrypt(message, key)
             message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
             client_socket.send(message_header + message)
-            print('pinged')
+            named_tuple = time.localtime()  # get struct_time
+            ctime = time.strftime("%m/%d/%Y, %I:%M:%S %p", named_tuple)
+            print(f'[{ctime}] pinged')
             time.sleep(200)
-
 
     except IOError as e:
         # This is normal on non blocking connections - when there are no incoming data error is going to be raised
@@ -129,5 +130,7 @@ while True:
 
         # We just did not receive anything
         continue
+    except Exception as err:
+        print(str(err))
 
 
