@@ -668,7 +668,11 @@ while True:
                     print(f'{print_time_str} |​⃰ {username} {message.split("/me ")[1]}')
                 elif f'@{my_username}' in message:
                     print(f'{print_time_str} |{username}{sep} {message}')
-                    toaster.show_toast(f'{username} | Chatpy', message, icon_path=None, duration=3, threaded=False)
+                    try:
+                        toaster.show_toast(f'{username} | Chatpy', message, icon_path=None, duration=3, threaded=False)
+                    except Exception as e:
+                        print(e)
+                        input('... ')
 
                 elif 'joined the chat!' in message or 'left the chat!' in message:
                     print(f'{print_time_str} |Server{sep} {message}')
@@ -692,7 +696,7 @@ while True:
 
         except Exception as e:
             # Any other exception - something happened, exit
-            print('Error: '.format(str(e)))
+            print('Error: ' + str(e))
             input('Press enter to exit...')
             exit()
 
