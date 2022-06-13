@@ -6,6 +6,7 @@ from cryptography.fernet import Fernet
 from pythonping import ping
 from pynput import keyboard
 import ctypes
+from win10toast import ToastNotifier
 
 
 def getWindow():
@@ -46,6 +47,7 @@ def intping(destToPing):
     ptime = response_list.rtt_avg_ms
     return ptime
 
+toaster = ToastNotifier()
 
 # there is definitely a better way to do the following bit of code, but i cant think of it currently. belive me tho, i dont want to do it like this
 def get_sendmsg():
@@ -330,7 +332,7 @@ if sendm == 'm':
 elif sendm == 'l':
     shct = 'Ctrl + C'
 
-print('Connected to '+IP+':'+str(PORT)+' (Ping: '+str(intping(IP))+f'ms)! Press {shct} to talk, use !msg <username> <message> to send a private mesage, and type exit to quit.')
+print('Connected to '+IP+':'+str(PORT)+' (Ping: '+str(intping(IP))+f'ms)! Press {shct} to talk, use !msg <username> <message> to send a private mesage, use @<username> to ping, and type exit to quit.')
 my_username = input("Username: ")
 my_username = my_username.replace(' ', '_')
 
@@ -664,6 +666,9 @@ while True:
 
                 elif '/me ' in message:
                     print(f'{print_time_str} |​⃰ {username} {message.split("/me ")[1]}')
+                elif f'@{my_username}' in message:
+                    print(f'{print_time_str} |{username}{sep} {message}')
+                    toaster.show_toast(f'{username} | Chatpy', message, icon_path=None, duration=3, threaded=False)
 
                 elif 'joined the chat!' in message or 'left the chat!' in message:
                     print(f'{print_time_str} |Server{sep} {message}')
