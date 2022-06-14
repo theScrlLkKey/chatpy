@@ -657,7 +657,8 @@ while True:
                                 print(f'All posts, sorted old to new: \n{newline.join(reversed(message))}')
                             else:
                                 print(f'''{print_time_str} |Private message from {username}{sep} {', '.join(message)}''')
-                                plyer.platforms.win.notification.instance().notify(title=f'Private message from: {username} | Chatpy', message=message, timeout=3)
+                                if getWindow() == curhwnd:
+                                    plyer.platforms.win.notification.instance().notify(title=f'Private message from: {username} | Chatpy', message=message, timeout=3)
                     except:
                         continue
 
@@ -670,7 +671,8 @@ while True:
                 elif f'@{my_username}' in message:
                     print(f'{print_time_str} |{username}{sep} {message}')
                     try:
-                        plyer.platforms.win.notification.instance().notify(title=f'{username} | Chatpy', message=message, timeout=3)
+                        if getWindow() == curhwnd:
+                            plyer.platforms.win.notification.instance().notify(title=f'{username} | Chatpy', message=message, timeout=3)
                         # toaster.show_toast(f'{username} | Chatpy', message, icon_path=None, duration=3, threaded=False)
                     except Exception as e:
                         print(e)
