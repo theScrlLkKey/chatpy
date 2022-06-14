@@ -657,6 +657,7 @@ while True:
                                 print(f'All posts, sorted old to new: \n{newline.join(reversed(message))}')
                             else:
                                 print(f'''{print_time_str} |Private message from {username}{sep} {', '.join(message)}''')
+                                plyer.platforms.win.notification.instance().notify(title=f'Private message from: {username} | Chatpy', message=message, timeout=3)
                     except:
                         continue
 
