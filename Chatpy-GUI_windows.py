@@ -6,7 +6,6 @@ import time
 import urllib.request
 from cryptography.fernet import Fernet
 from pythonping import ping
-from pynput import keyboard
 import ctypes
 import plyer.platforms.win.notification
 
@@ -50,7 +49,23 @@ def intping(destToPing):
 
 
 def printtogui(msg):
-    msg_list.insert(tk.END, msg)
+    msg_box.configure(state='normal')
+    msg_box.insert(tk.END, msg + '\n')
+    msg_box.see(tk.END)
+    msg_box.configure(state='disabled')
+
+def inputfromgui(prompt):
+    msg_box.configure(state='normal')
+    msg_box.insert(tk.END, prompt)
+    msg_box.see(tk.END)
+    msg_box.configure(state='disabled')
+
+    out = str(my_msg.get())
+    my_msg.set("")
+
+    printtogui(out)
+
+    return out
 
 
 def receive():
@@ -84,7 +99,7 @@ def receive():
                 client_socket.send(message_header + message)
                 print('Disconnected. You were idle for too long.')
                 input('Press enter to exit...')
-                exit()
+                on_closing()
 
             message = ''
             # time.sleep(0.001)
@@ -109,7 +124,7 @@ def receive():
                     if not len(username_header):
                         print('Connection closed by the server')
                         input('Press enter to exit...')
-                        exit()
+                        on_closing()
 
                     # Convert header to int value
                     username_length = int(username_header.decode('utf-8').strip())
@@ -151,7 +166,7 @@ def receive():
                                     if not len(username_header):
                                         print('Connection closed by the server')
                                         input('Press enter to exit...')
-                                        exit()
+                                        on_closing()
 
                                     # Convert header to int value
                                     username_length = int(username_header.decode('utf-8').strip())
@@ -183,7 +198,7 @@ def receive():
                         message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                         client_socket.send(message_header + message)
                         input('Press enter to exit...')
-                        exit()
+                        on_closing()
                     elif username == 'enc_distr' or '!req' in message:
                         continue
                     elif '/post ' in message and username != 'Forum post manager':
@@ -200,12 +215,13 @@ def receive():
 
                     elif message == '!kick ' + my_username:
                         print('You were disconnected.')
+                        printtogui('You were disconnected.')
                         message = my_username + ' has left the chat!'
                         message = message.encode('utf-8')
                         message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                         client_socket.send(message_header + message)
                         input('Press enter to exit...')
-                        exit()
+                        on_closing()
                     elif '!ban ' in message:
                         continue
                     elif ' was taken. Disconnected!' in message:
@@ -221,7 +237,7 @@ def receive():
                                 if not len(username_header):
                                     print('Connection closed by the server')
                                     input('Press enter to exit...')
-                                    exit()
+                                    on_closing()
 
                                 # Convert header to int value
                                 username_length = int(username_header.decode('utf-8').strip())
@@ -332,7 +348,7 @@ def receive():
                 if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK:
                     print('Reading error: {}'.format(str(e)))
                     input('Press enter to exit...')
-                    exit()
+                    on_closing()
 
                 # We just did not receive anything
                 continue
@@ -341,15 +357,17 @@ def receive():
                 # Any other exception - something happened, exit
                 print('Error: ' + str(e))
                 input('Press enter to exit...')
-                exit()
+                on_closing()
         except Exception as e:
             # Any other exception - something happened, exit
             print('Error: ' + str(e))
             input('Press enter to exit...')
-            exit()
+            on_closing()
 
+wrapat = 10
 
 def send(event=None):
+    global cm  # ??????????????????????
     global key
     global sttime
     global stimef
@@ -367,7 +385,7 @@ def send(event=None):
 
         message = str(my_msg.get())
         my_msg.set("")
-        printtogui(f'{print_time_str} |{my_username}{sep} {message}')
+
 
         if message == 'exit' or message == 'Exit':
             if stlent == 'y':
@@ -378,7 +396,7 @@ def send(event=None):
                 message = message.encode('utf-8')
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                 client_socket.send(message_header + message)
-            exit()
+            on_closing()
         if message == '!erelog':
             message = '!relog'
             message = message.encode('utf-8')
@@ -397,7 +415,7 @@ def send(event=None):
                     if not len(username_header):
                         print('Connection closed by the server')
                         input('Press enter to exit...')
-                        exit()
+                        on_closing()
 
                     # Convert header to int value
                     username_length = int(username_header.decode('utf-8').strip())
@@ -417,6 +435,41 @@ def send(event=None):
                         continue
                 except:
                     continue
+        elif message == '!color':
+            if not cm:
+                cm = True
+                top.configure(bg='black')
+                msg_box.configure(bg='black', foreground='white')
+                entry_field.configure(bg='black', foreground='white', insertbackground='white')
+                send_button.configure(bg='black', foreground='white')
+                scrollbar.configure(bg='black')
+                with open(path, 'w+') as data:
+                    data.write("""
+IP = '""" + str(IP) + """'
+PORT = """ + str(PORT) + """
+sep = '""" + str(sep) + """'
+stlent = '""" + str(stlent) + """' 
+hbc = '""" + str(hbc) + """' 
+sendm = '""" + str(sendm) + """' 
+cm = '""" + str(cm) + "'")
+            else:
+                cm = False
+                top.configure(bg='white')
+                msg_box.configure(bg='white', foreground='black')
+                entry_field.configure(bg='white', foreground='black', insertbackground='black')
+                send_button.configure(bg='white', foreground='black')
+                scrollbar.configure(bg='white')
+                with open(path, 'w+') as data:
+                    data.write("""
+IP = '""" + str(IP) + """'
+PORT = """ + str(PORT) + """
+sep = '""" + str(sep) + """'
+stlent = '""" + str(stlent) + """' 
+hbc = '""" + str(hbc) + """' 
+sendm = '""" + str(sendm) + """' 
+cm = '""" + str(cm) + "'")
+
+
         elif message == '!relog':
             message = '!erelog'
             message = message.encode('utf-8')
@@ -434,7 +487,7 @@ def send(event=None):
                     if not len(username_header):
                         print('Connection closed by the server')
                         input('Press enter to exit...')
-                        exit()
+                        on_closing()
 
                     # Convert header to int value
                     username_length = int(username_header.decode('utf-8').strip())
@@ -470,6 +523,7 @@ def send(event=None):
                 title = input('Post title: ')
                 post = input('Write post:\n')
                 message = f'/post new {post} ;;; {title}'
+            printtogui(f'{print_time_str} |{my_username}{sep} {message}')
             # Encode message to bytes, prepare header and convert to bytes, like for username above, then send
             message = message.encode('utf-8')
             try:
@@ -494,7 +548,7 @@ def send(event=None):
                         if not len(username_header):
                             print('Connection closed by the server')
                             input('Press enter to exit...')
-                            exit()
+                            on_closing()
 
                         # Convert header to int value
                         username_length = int(username_header.decode('utf-8').strip())
@@ -539,30 +593,7 @@ def on_closing(event=None):
 
 killed = False
 
-top = tk.Tk()
-top.title("Chatpy")
-top.geometry("1000x575")
-top.resizable(False, False)
-# top.configure(bg='black')
 
-messages_frame = tk.Frame(top)
-my_msg = tk.StringVar()
-my_msg.set("")
-scrollbar = tk.Scrollbar(messages_frame)
-
-msg_list = tk.Listbox(messages_frame, height=34, width=162, yscrollcommand=scrollbar.set)
-scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-msg_list.pack(side=tk.LEFT, fill=tk.BOTH)
-msg_list.pack()
-messages_frame.pack()
-
-entry_field = tk.Entry(top, textvariable=my_msg, width=158)
-entry_field.bind("<Return>", send)
-entry_field.pack(side=tk.LEFT, padx=4)
-send_button = tk.Button(top, text="Send", command=send)
-send_button.pack(side=tk.RIGHT, padx=1)
-
-top.protocol("WM_DELETE_WINDOW", on_closing)
 
 # begin chatroom code
 
@@ -570,15 +601,13 @@ path = 'config.txt'
 
 HEADER_LENGTH = 10
 
-# get current hwnd hopefully
-curhwnd = getWindow()
 
 try:
     ip = urllib.request.urlopen('https://api.ipify.org').read().decode('utf8')
 except:
     print('No internet!')
     input('Press enter to exit...')
-    exit()
+    on_closing()
 
 IP = '127.0.0.1'
 PORT = 1234
@@ -587,6 +616,7 @@ sep = ':'
 hbc = ''
 sendm = 'm'
 shct = 'Tab + Space'
+cm = False
 
 # print('Starting chatpy now...')
 # time.sleep(1)
@@ -607,7 +637,8 @@ PORT = """ + str(PORT) + """
 sep = '""" + str(sep) + """'
 stlent = '""" + str(stlent) + """' 
 hbc = '""" + str(hbc) + """' 
-sendm = '""" + str(sendm) + "'")
+sendm = '""" + str(sendm) + """' 
+cm = '""" + str(cm) + "'")
 
 
 else:
@@ -633,7 +664,8 @@ PORT = """ + str(PORT) + """
 sep = '""" + str(sep) + """'
 stlent = '""" + str(stlent) + """' 
 hbc = '""" + str(hbc) + """' 
-sendm = '""" + str(sendm) + "'")
+sendm = '""" + str(sendm) + """' 
+cm = '""" + str(cm) + "'")
 
 # my_username = input("Username: ")
 
@@ -664,7 +696,8 @@ PORT = """ + str(PORT) + """
 sep = '""" + str(sep) + """'
 stlent = '""" + str(stlent) + """' 
 hbc = '""" + str(hbc) + """' 
-sendm = '""" + str(sendm) + "'")
+sendm = '""" + str(sendm) + """' 
+cm = '""" + str(cm) + "'")
 
 hotkey_active = False
 
@@ -674,7 +707,7 @@ elif sendm == 'l':
     shct = 'Ctrl + C'
 
 print('Connected to ' + IP + ':' + str(PORT) + ' (Ping: ' + str(intping(
-    IP)) + f'ms)! Press {shct} to talk, use !msg <username> <message> to send a private mesage, use @<username> to ping, and type exit to quit.')
+    IP)) + f'ms)! Press {shct} to talk, use !msg <username> <message> to send a private mesage, use @<username> to ping, use !color to switch color schemes, and type exit to quit.')
 my_username = input("Username: ")
 my_username = my_username.replace(' ', '_')
 
@@ -712,7 +745,7 @@ else:
             if not len(username_header):
                 print('Connection closed by the server')
                 input('Press enter to exit...')
-                exit()
+                on_closing()
 
             # Convert header to int value
             username_length = int(username_header.decode('utf-8').strip())
@@ -741,7 +774,50 @@ else:
 usrstatus = ''
 
 # end chatroom code
+top = tk.Tk()
+top.title("Chatpy")
+top.geometry("1000x575")
+top.resizable(True, True)
+# top.configure(bg='black')
+
+messages_frame = tk.Frame(top)
+my_msg = tk.StringVar()
+my_msg.set("")
+scrollbar = tk.Scrollbar(messages_frame)
+
+msg_box = tk.Text(messages_frame, height=34, width=162, yscrollcommand=scrollbar.set)
+scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+msg_box.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+msg_box.pack()
+messages_frame.pack(fill=tk.BOTH, expand=True)
+
+entry_field = tk.Entry(top, textvariable=my_msg, width=158)
+entry_field.bind("<Return>", send)
+entry_field.pack(side=tk.LEFT, padx=4, fill=tk.BOTH, expand=True)
+send_button = tk.Button(top, text="Send", command=send)
+send_button.pack(side=tk.RIGHT, padx=1)
+
+top.protocol("WM_DELETE_WINDOW", on_closing)
+
+if cm:
+    top.configure(bg='black')
+    msg_box.configure(bg='black', foreground='white')
+    entry_field.configure(bg='black', foreground='white', insertbackground='white')
+    send_button.configure(bg='black', foreground='white')
+    scrollbar.configure(bg='black')
+else:
+    top.configure(bg='white')
+    msg_box.configure(bg='white', foreground='black')
+    entry_field.configure(bg='white', foreground='black', insertbackground='black')
+    send_button.configure(bg='white', foreground='black')
+    scrollbar.configure(bg='white')
+printtogui('Connected to ' + IP + ':' + str(PORT) + ' (Ping: ' + str(intping(
+    IP)) + f'ms)! Press {shct} to talk, use !msg <username> <message> to send a private mesage, use @<username> to ping, use !color to switch color schemes, and type exit to quit.')
 
 receive_thread = Thread(target=receive)
 receive_thread.start()
+top.lift()
+top.focus_force()
+# get current hwnd hopefully
+curhwnd = getWindow()
 tk.mainloop()

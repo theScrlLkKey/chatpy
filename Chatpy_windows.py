@@ -10,7 +10,6 @@ import plyer.platforms.win.notification
 # change back to win10toast when nuitka gets updated
 
 
-
 def getWindow():
     hwnd = ctypes.windll.user32.GetForegroundWindow()
     length = ctypes.windll.user32.GetWindowTextLengthW(hwnd)
@@ -26,7 +25,6 @@ def encrypt(message, key):
 
     f = Fernet(key)
     file_data = message
-
 
     encrypted_data = f.encrypt(file_data)
     return encrypted_data
