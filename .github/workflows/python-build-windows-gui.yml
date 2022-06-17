@@ -1,0 +1,43 @@
+name: Build GUI for windows
+
+on:
+  push:
+      paths:
+      - 'Chatpy-GUI_windows.py'
+  pull_request:
+      paths:
+      - 'Chatpy-GUI_windows.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install nuitka ordered-set zstandard pythonping cryptography plyer
+    - name: Compile
+      run: |
+        python -m nuitka --standalone --assume-yes-for-downloads Chatpy-GUI_windows.py
+        ren Chatpy_windows.dist Chatpy_windows
+        
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v3.1.0
+      with:
+        # Artifact name
+        name: Chatpy-GUI_windows
+        # A file, directory or wildcard pattern that describes what to upload
+        path: Chatpy-GUI_windows
+        # The desired behavior if no files are found using the provided path.
+        retention-days: 90
