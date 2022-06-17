@@ -29,8 +29,8 @@ jobs:
         python -m pip install nuitka ordered-set zstandard pythonping cryptography plyer
     - name: Compile
       run: |
-        python -m nuitka --standalone --assume-yes-for-downloads Chatpy-GUI_windows.py
-        ren Chatpy_windows.dist Chatpy_windows
+        python -m nuitka --standalone --assume-yes-for-downloads --enable-plugin=tk-inter Chatpy-GUI_windows.py
+        ren Chatpy-GUI_windows.dist Chatpy-GUI_windows
         
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.1.0
