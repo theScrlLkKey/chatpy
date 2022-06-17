@@ -168,7 +168,7 @@ while True:
                 client_socket.send(message_header + message)
             elif 'joined the chat!' in message and 'joined the chat!' in ogmessage.decode('utf-8'):
                 time.sleep(1)
-                smessage = '!msg ' + username + f'hi {username}. you can make a bio for yourself, do !msg Userinfo enroll <bio>. to find another users bio, do !userinfo <user>. i will also respond to "A/S/L". add your pronouns with !msg Userinfo pronouns <abc/xyz> and ill correct people when they refer to you.'
+                smessage = '!msg ' + username + f'hi {username}. you can make a bio for yourself, do !msg Userinfo enroll <bio>. to find another users bio, do !userinfo <user>. '
                 message = smessage.encode('utf-8')
                 message = encrypt(message, key)
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
