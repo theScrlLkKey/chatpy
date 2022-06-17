@@ -30,7 +30,7 @@ jobs:
     - name: Compile
       run: |
         python -m nuitka --standalone --assume-yes-for-downloads Chatpy-GUI_windows.py
-        ren Chatpy_windows.dist Chatpy_windows
+        ren Chatpy_windows-GUI.dist Chatpy-GUI_windows
         
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.1.0
