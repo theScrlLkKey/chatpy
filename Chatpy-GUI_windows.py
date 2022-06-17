@@ -651,7 +651,7 @@ else:
             print('Port must be a number.')
 
     sep = input('Separator between username and message (Eg. Tim>> hi or Tim: hi): ')
-    sendm = input('Use modern (ctrl+shift) or legacy (ctrl+c, NOT SUPPORTED IN THIS VERSION) shortcut to enter send mode? (M/l): ').lower()
+    sendm = ''
     if sendm == '':
         sendm = 'm'
     hbc = input('Hide (most) bot commands? (y/N): ').lower()
@@ -707,7 +707,7 @@ elif sendm == 'l':
     shct = 'Ctrl + C'
 
 print('Connected to ' + IP + ':' + str(PORT) + ' (Ping: ' + str(intping(
-    IP)) + f'ms)! Press {shct} to talk, use !msg <username> <message> to send a private mesage, use @<username> to ping, use !color to switch color schemes, and type exit to quit.')
+    IP)) + f'ms)! Use !msg <username> <message> to send a private mesage, use @<username> to ping, use !color to switch color schemes, and type exit to quit.')
 my_username = input("Username: ")
 my_username = my_username.replace(' ', '_')
 
@@ -812,7 +812,7 @@ else:
     send_button.configure(bg='white', foreground='black')
     scrollbar.configure(bg='white')
 printtogui('Connected to ' + IP + ':' + str(PORT) + ' (Ping: ' + str(intping(
-    IP)) + f'ms)! Press {shct} to talk, use !msg <username> <message> to send a private mesage, use @<username> to ping, use !color to switch color schemes, and type exit to quit.')
+    IP)) + f'ms)! Use !msg <username> <message> to send a private mesage, use @<username> to ping, use !color to switch color schemes, and type exit to quit.')
 
 receive_thread = Thread(target=receive)
 receive_thread.start()

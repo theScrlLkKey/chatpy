@@ -131,6 +131,7 @@ while True:
             message_header = client_socket.recv(HEADER_LENGTH)
             message_length = int(message_header.decode('utf-8').strip())
             message = client_socket.recv(message_length)
+            ogmessage = message
             if 'joined the chat!' in message.decode('utf-8') or 'left the chat!' in message.decode('utf-8') or '!relog' in message.decode('utf-8') or '!req' in message.decode('utf-8'):
                 message = message.decode('utf-8')
             else:
@@ -145,8 +146,8 @@ while True:
             cutime = int(time.strftime("%H", named_tuple))
 
             # Print message
-            if 'what is tumbleweed' in message.lower():
-                smessage = 'i exist elsewhere'
+            if message == '!userinfo':
+                smessage = '!msg '
                 message = smessage.encode('utf-8')
                 message = encrypt(message, key)
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
@@ -165,6 +166,14 @@ while True:
                 message = encrypt(message, key)
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                 client_socket.send(message_header + message)
+            elif 'joined the chat!' in message and 'joined the chat!' in ogmessage.decode('utf-8'):
+                time.sleep(1)
+                smessage = '!msg ' + username + f'hi {username}. you can make a bio for yourself, do !msg Userinfo enroll <bio>. to find another users bio, do !userinfo <user>. i will also respond to "A/S/L". add your pronouns with !msg Userinfo pronouns <abc/xyz> and ill correct people when they refer to you.'
+                message = smessage.encode('utf-8')
+                message = encrypt(message, key)
+                message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+                client_socket.send(message_header + message)
+
 
     except IOError as e:
         # This is normal on non blocking connections - when there are no incoming data error is going to be raised
