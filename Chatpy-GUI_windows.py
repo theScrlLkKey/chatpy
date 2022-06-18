@@ -98,6 +98,7 @@ def receive():
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                 client_socket.send(message_header + message)
                 print('Disconnected. You were idle for too long.')
+                top.quit()
                 input('Press enter to exit...')
                 on_closing()
 
@@ -123,6 +124,7 @@ def receive():
                     # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
                     if not len(username_header):
                         print('Connection closed by the server')
+                        top.quit()
                         input('Press enter to exit...')
                         on_closing()
 
@@ -165,6 +167,7 @@ def receive():
                                     # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
                                     if not len(username_header):
                                         print('Connection closed by the server')
+                                        top.quit()
                                         input('Press enter to exit...')
                                         on_closing()
 
@@ -197,6 +200,7 @@ def receive():
                         message = encrypt(message, key)
                         message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                         client_socket.send(message_header + message)
+                        top.quit()
                         input('Press enter to exit...')
                         on_closing()
                     elif username == 'enc_distr' or '!req' in message:
@@ -220,6 +224,7 @@ def receive():
                         message = message.encode('utf-8')
                         message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                         client_socket.send(message_header + message)
+                        top.quit()
                         input('Press enter to exit...')
                         on_closing()
                     elif '!ban ' in message:
@@ -236,6 +241,7 @@ def receive():
                                 # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
                                 if not len(username_header):
                                     print('Connection closed by the server')
+                                    top.quit()
                                     input('Press enter to exit...')
                                     on_closing()
 
@@ -347,6 +353,7 @@ def receive():
                 # If we got different error code - something happened
                 if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK:
                     print('Reading error: {}'.format(str(e)))
+                    top.quit()
                     input('Press enter to exit...')
                     on_closing()
 
@@ -356,11 +363,13 @@ def receive():
             except Exception as e:
                 # Any other exception - something happened, exit
                 print('Error: ' + str(e))
+                top.quit()
                 input('Press enter to exit...')
                 on_closing()
         except Exception as e:
             # Any other exception - something happened, exit
             print('Error: ' + str(e))
+            top.quit()
             input('Press enter to exit...')
             on_closing()
 
@@ -414,6 +423,7 @@ def send(event=None):
                     # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
                     if not len(username_header):
                         print('Connection closed by the server')
+                        top.quit()
                         input('Press enter to exit...')
                         on_closing()
 
@@ -486,6 +496,7 @@ cm = '""" + str(cm) + "'")
                     # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
                     if not len(username_header):
                         print('Connection closed by the server')
+                        top.quit()
                         input('Press enter to exit...')
                         on_closing()
 
@@ -547,6 +558,7 @@ cm = '""" + str(cm) + "'")
                         # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
                         if not len(username_header):
                             print('Connection closed by the server')
+                            top.quit()
                             input('Press enter to exit...')
                             on_closing()
 
@@ -585,10 +597,14 @@ cm = '""" + str(cm) + "'")
 
 def on_closing(event=None):
     global killed
-    top.destroy()
-    killed = True
-    receive_thread.join()
+    try:
+        top.destroy()
+        killed = True
+        receive_thread.join()
+    except:
+        pass
     exit()
+
 
 
 killed = False
