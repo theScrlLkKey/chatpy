@@ -33,8 +33,8 @@ except ModuleNotFoundError:
 
 try:
     from pynput import keyboard
-except ModuleNotFoundError:
-    doinst = input('"pynput" module not found. Would you like to install it now? (Y/n) ').lower()
+except:
+    doinst = input('"pynput" module either not installed or unavailable on your current platform. Would you like to install it to use the modern input handler? (Y/n) ').lower()
     if doinst == 'y' or doinst == '':
         install('pynput')
     else:
