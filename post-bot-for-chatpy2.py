@@ -153,6 +153,12 @@ while True:
                 message = encrypt(message, key)
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                 client_socket.send(message_header + message)
+            elif message == '/post new':
+                smessage = f'!msg {username} Post syntax: /post new <post> ;;; <title>'
+                message = smessage.encode('utf-8')
+                message = encrypt(message, key)
+                message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+                client_socket.send(message_header + message)
 
             elif '/post new ' in message:
                 mes_trim = message.split(' ', 1)[1]

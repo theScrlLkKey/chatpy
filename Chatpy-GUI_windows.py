@@ -54,18 +54,25 @@ def printtogui(msg):
     msg_box.see(tk.END)
     msg_box.configure(state='disabled')
 
-def inputfromgui(prompt):
-    msg_box.configure(state='normal')
-    msg_box.insert(tk.END, prompt)
-    msg_box.see(tk.END)
-    msg_box.configure(state='disabled')
-
-    out = str(my_msg.get())
-    my_msg.set("")
-
-    printtogui(out)
-
-    return out
+# def inputfromgui(prompt): hell
+#     global inputask
+#     msg_box.configure(state='normal')
+#     msg_box.insert(tk.END, prompt)
+#     msg_box.see(tk.END)
+#     msg_box.configure(state='disabled')
+#     inputask = True
+#     while inputask:
+#         msg_box.configure(state='normal')
+#         msg_box.insert(tk.END, 'prompt')
+#         msg_box.see(tk.END)
+#         msg_box.configure(state='disabled')
+#
+#     out = str(my_msg.get())
+#     my_msg.set("")
+#
+#     printtogui(out)
+#
+#     return out
 
 
 def receive():
@@ -337,7 +344,7 @@ def receive():
                             # toaster.show_toast(f'{username} | Chatpy', message, icon_path=None, duration=3, threaded=False)
                         except Exception as e:
                             print(e)
-                            inputfromgui('... ')
+                            input('... ')
 
                     elif 'joined the chat!' in message or 'left the chat!' in message:
                         printtogui(f'{print_time_str} |Server{sep} {message}')
@@ -380,6 +387,7 @@ def send(event=None):
     global key
     global sttime
     global stimef
+    global inputask
     global username
     global usrstatus
     global trytoreauth
@@ -389,6 +397,8 @@ def send(event=None):
     global username_header
     global username_length
     try:
+
+
         named_tuple = time.localtime()  # get struct_time
         print_time_str = time.strftime("%I:%M%p", named_tuple)
 
@@ -530,10 +540,9 @@ cm = '""" + str(cm) + "'")
 
             elif message == '/post list':
                 message = '/post list_int'
-            elif message == '/post new':
-                title = inputfromgui('Post title: ')
-                post = inputfromgui('Write post:\n')
-                message = f'/post new {post} ;;; {title}'
+            # elif message == '/post new':
+            #     printtogui('Post syntax: /post new <post> ;;; <title>')
+                # message = f'/post new {post} ;;; {title}'
             printtogui(f'{print_time_str} |{my_username}{sep} {message}')
             # Encode message to bytes, prepare header and convert to bytes, like for username above, then send
             message = message.encode('utf-8')
