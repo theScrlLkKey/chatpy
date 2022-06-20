@@ -8,6 +8,7 @@ from cryptography.fernet import Fernet
 from pythonping import ping
 import ctypes
 import plyer.platforms.win.notification
+from sys import exit
 
 def getWindow():
     hwnd = ctypes.windll.user32.GetForegroundWindow()
