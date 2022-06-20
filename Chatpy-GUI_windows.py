@@ -337,7 +337,7 @@ def receive():
                             # toaster.show_toast(f'{username} | Chatpy', message, icon_path=None, duration=3, threaded=False)
                         except Exception as e:
                             print(e)
-                            input('... ')
+                            inputfromgui('... ')
 
                     elif 'joined the chat!' in message or 'left the chat!' in message:
                         printtogui(f'{print_time_str} |Server{sep} {message}')
@@ -531,8 +531,8 @@ cm = '""" + str(cm) + "'")
             elif message == '/post list':
                 message = '/post list_int'
             elif message == '/post new':
-                title = input('Post title: ')
-                post = input('Write post:\n')
+                title = inputfromgui('Post title: ')
+                post = inputfromgui('Write post:\n')
                 message = f'/post new {post} ;;; {title}'
             printtogui(f'{print_time_str} |{my_username}{sep} {message}')
             # Encode message to bytes, prepare header and convert to bytes, like for username above, then send
