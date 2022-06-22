@@ -66,6 +66,7 @@ try:
     os.chdir('usrinfo')
 except:
     os.mkdir('usrinfo')
+    os.chdir('usrinfo')
 
 # Set connection to non-blocking state, so .recv() call won;t block, just return some exception we'll handle
 client_socket.setblocking(False)
