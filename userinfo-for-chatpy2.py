@@ -4,6 +4,9 @@ import errno
 import time
 import urllib.request
 from cryptography.fernet import Fernet
+import os
+import zlib
+from os import walk
 
 # userinfo bot
 
@@ -59,6 +62,10 @@ while True:
 
 print('Connected!')
 my_username = 'Userinfo'
+try:
+    os.chdir('usrinfo')
+except:
+    os.mkdir('usrinfo')
 
 # Set connection to non-blocking state, so .recv() call won;t block, just return some exception we'll handle
 client_socket.setblocking(False)
@@ -146,19 +153,121 @@ while True:
             cutime = int(time.strftime("%H", named_tuple))
 
             # Print message
+            # # Print message
+            # if message == '!userinfo':
+            #     smessage = '!msg '
+            #     message = smessage.encode('utf-8')
+            #     message = encrypt(message, key)
+            #     message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+            #     client_socket.send(message_header + message)
+            # elif message == '!userinfo':
+            #     smessage = '/me rolls by'
+            #     message = smessage.encode('utf-8')
+            #     message = encrypt(message, key)
+            #     message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+            #     client_socket.send(message_header + message)
+            #     sttime = cutime
+            #
+            # elif message == '!chkusr':
+            #     smessage = '!chkusrback'
+            #     message = smessage.encode('utf-8')
+            #     message = encrypt(message, key)
+            #     message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+            #     client_socket.send(message_header + message)
+            # elif 'joined the chat!' in message and 'joined the chat!' in ogmessage.decode('utf-8'):
+            #     time.sleep(1)
+            #     smessage = '!msg ' + username + f'hi {username}. you can make a bio for yourself, do !msg Userinfo enroll <bio>. to find another users bio, do !userinfo <user>. add your pronouns with !msg Userinfo pronouns <abc/xyz> and ill correct people when they refer to you.'
+            #     message = smessage.encode('utf-8')
+            #     message = encrypt(message, key)
+            #     message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+            #     client_socket.send(message_header + message)
+
             if message == '!userinfo':
-                smessage = '!msg '
+                #. add your pronouns with !msg Userinfo pronouns <abc/xyz> and ill correct people when they refer to you.
+                smessage = f'!msg {username} hi {username}. you can make a bio for yourself, do !msg Userinfo setbio <bio>. to find another users bio, do !userinfo <user>. use !userinfo greet to display your own bio. '
                 message = smessage.encode('utf-8')
                 message = encrypt(message, key)
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                 client_socket.send(message_header + message)
-            elif message == '!userinfo':
-                smessage = '/me rolls by'
+
+
+            elif '!msg userinfo setbio ' in message.lower():
+                try:
+                    mes_trim = message.split(' ', 2)[2]
+                    mes_trim = mes_trim.split()
+                    mes_trim.pop(0)
+                    mes_trim = ' '.join(mes_trim)
+                    # print(mes_trim)
+                except:
+                    smessage = f"!msg {username} not a valid command"
+                    message = smessage.encode('utf-8')
+                    message = encrypt(message, key)
+                    message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+                    client_socket.send(message_header + message)
+                    continue
+
+                with open(f'{str(zlib.crc32(username.encode("utf-8")))}.txt', 'w+') as data:
+                    data.write(str(mes_trim))
+
+                smessage = f'!msg {username} successfully added bio. access it with !userinfo {username}, or !userinfo greet.'
                 message = smessage.encode('utf-8')
                 message = encrypt(message, key)
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                 client_socket.send(message_header + message)
-                sttime = cutime
+
+            elif message == '!userinfo greet':
+                try:
+                    with open(f'{str(zlib.crc32(username.encode("utf-8")))}.txt', "r") as pfile:
+                        gotbio = pfile.read()
+
+                    # print(postMeta)
+                    # {title} ;`; {opname} ;`; {ptime} ;`; {post}')
+                    # print(f'fetchedpost {postMeta[0]} ;`; {postMeta[1]} ;`; {postMeta[2]} ;`; {post}')
+
+                    smessage = f"{username}'s bio: \n{gotbio}"
+                    message = smessage.encode('utf-8')
+                    message = encrypt(message, key)
+                    message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+                    client_socket.send(message_header + message)
+                except Exception as e:
+                    smessage = f"you dont have a bio, {username}!"
+                    message = smessage.encode('utf-8')
+                    message = encrypt(message, key)
+                    message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+                    client_socket.send(message_header + message)
+
+            elif '!userinfo ' in message:
+                try:
+                    mes_trim = message.split(' ', 1)[1]
+                except:
+                    smessage = f"not a valid command"
+                    message = smessage.encode('utf-8')
+                    message = encrypt(message, key)
+                    message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+                    client_socket.send(message_header + message)
+                    continue
+
+                try:
+
+                    with open(f'{str(zlib.crc32(mes_trim.encode("utf-8")))}.txt', "r") as pfile:
+                        gotbio = pfile.read()
+
+                    # print(postMeta)
+                    # {title} ;`; {opname} ;`; {ptime} ;`; {post}')
+                    # print(f'fetchedpost {postMeta[0]} ;`; {postMeta[1]} ;`; {postMeta[2]} ;`; {post}')
+
+                    smessage = f"{mes_trim}'s bio: \n{gotbio}"
+                    message = smessage.encode('utf-8')
+                    message = encrypt(message, key)
+                    message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+                    client_socket.send(message_header + message)
+                except Exception as e:
+                    smessage = f"no bio found for {mes_trim}."
+                    message = smessage.encode('utf-8')
+                    message = encrypt(message, key)
+                    message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+                    client_socket.send(message_header + message)
+
 
             elif message == '!chkusr':
                 smessage = '!chkusrback'
@@ -166,13 +275,15 @@ while True:
                 message = encrypt(message, key)
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                 client_socket.send(message_header + message)
-            elif 'joined the chat!' in message and 'joined the chat!' in ogmessage.decode('utf-8'):
+
+            elif 'joined the chat!' in message and 'joined the chat!' in ogmessage.decode('utf-8'):  # igore if already enrolled
                 time.sleep(1)
-                smessage = '!msg ' + username + f'hi {username}. you can make a bio for yourself, do !msg Userinfo enroll <bio>. to find another users bio, do !userinfo <user>. '
+                smessage = '!msg ' + username + f' hello. make a bio for yourself. !userinfo for more info.'
                 message = smessage.encode('utf-8')
                 message = encrypt(message, key)
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                 client_socket.send(message_header + message)
+
 
 
     except IOError as e:
