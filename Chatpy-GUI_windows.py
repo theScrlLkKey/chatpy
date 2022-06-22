@@ -107,6 +107,7 @@ def receive():
                 client_socket.send(message_header + message)
                 print('Disconnected. You were idle for too long.')
                 top.quit()
+                client_socket.close()
                 input('Press enter to exit...')
                 on_closing()
 
@@ -209,6 +210,7 @@ def receive():
                         message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                         client_socket.send(message_header + message)
                         top.quit()
+                        client_socket.close()
                         input('Press enter to exit...')
                         on_closing()
                     elif username == 'enc_distr' or '!req' in message:
@@ -233,6 +235,7 @@ def receive():
                         message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                         client_socket.send(message_header + message)
                         top.quit()
+                        client_socket.close()
                         input('Press enter to exit...')
                         on_closing()
                     elif '!ban ' in message:
@@ -362,6 +365,7 @@ def receive():
                 if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK:
                     print('Reading error: {}'.format(str(e)))
                     top.quit()
+                    client_socket.close()
                     input('Press enter to exit...')
                     on_closing()
 
@@ -371,6 +375,7 @@ def receive():
             except Exception as e:
                 # Any other exception - something happened, exit
                 print('Error: ' + str(e))
+                client_socket.close()
                 top.quit()
                 input('Press enter to exit...')
                 on_closing()
@@ -378,6 +383,7 @@ def receive():
             # Any other exception - something happened, exit
             print('Error: ' + str(e))
             top.quit()
+            client_socket.close()
             input('Press enter to exit...')
             on_closing()
 

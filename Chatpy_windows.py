@@ -435,6 +435,7 @@ while True:
             message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
             client_socket.send(message_header + message)
             print('Disconnected. You were idle for too long.')
+            client_socket.close()
             input('Press enter to exit...')
             exit()
 
@@ -542,6 +543,7 @@ while True:
                     message = encrypt(message, key)
                     message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                     client_socket.send(message_header + message)
+                    client_socket.close()
                     input('Press enter to exit...')
                     exit()
                 elif username == 'enc_distr' or '!req' in message:
@@ -564,6 +566,7 @@ while True:
                     message = message.encode('utf-8')
                     message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                     client_socket.send(message_header + message)
+                    client_socket.close()
                     input('Press enter to exit...')
                     exit()
                 elif '!ban ' in message:
@@ -690,6 +693,7 @@ while True:
             # If we got different error code - something happened
             if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK:
                 print('Reading error: {}'.format(str(e)))
+                client_socket.close()
                 input('Press enter to exit...')
                 exit()
 
@@ -699,6 +703,7 @@ while True:
         except Exception as e:
             # Any other exception - something happened, exit
             print('Error: ' + str(e))
+            client_socket.close()
             input('Press enter to exit...')
             exit()
 
