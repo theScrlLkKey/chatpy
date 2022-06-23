@@ -478,7 +478,7 @@ sep = '""" + str(sep) + """'
 stlent = '""" + str(stlent) + """' 
 hbc = '""" + str(hbc) + """' 
 sendm = '""" + str(sendm) + """' 
-cm = '""" + str(cm) + "'")
+cm = """ + str(cm) + "")
             else:
                 cm = False
                 top.configure(bg='white')
@@ -494,7 +494,7 @@ sep = '""" + str(sep) + """'
 stlent = '""" + str(stlent) + """' 
 hbc = '""" + str(hbc) + """' 
 sendm = '""" + str(sendm) + """' 
-cm = '""" + str(cm) + "'")
+cm = """ + str(cm) + "")
 
 
         elif message == '!relog':
@@ -670,7 +670,7 @@ sep = '""" + str(sep) + """'
 stlent = '""" + str(stlent) + """' 
 hbc = '""" + str(hbc) + """' 
 sendm = '""" + str(sendm) + """' 
-cm = '""" + str(cm) + "'")
+cm = """ + str(cm) + "")
 
 
 else:
@@ -697,10 +697,13 @@ sep = '""" + str(sep) + """'
 stlent = '""" + str(stlent) + """' 
 hbc = '""" + str(hbc) + """' 
 sendm = '""" + str(sendm) + """' 
-cm = '""" + str(cm) + "'")
+cm = """ + str(cm) + "")
 
 # my_username = input("Username: ")
-
+if cm == 'True':  # backwards compatibility or smth
+    cm = True
+elif cm == 'False':
+    cm = False
 # Create a socket
 # socket.AF_INET - address family, IPv4, some otehr possible are AF_INET6, AF_BLUETOOTH, AF_UNIX
 # socket.SOCK_STREAM - TCP, conection-based, socket.SOCK_DGRAM - UDP, connectionless, datagrams, socket.SOCK_RAW - raw IP packets
@@ -729,7 +732,7 @@ sep = '""" + str(sep) + """'
 stlent = '""" + str(stlent) + """' 
 hbc = '""" + str(hbc) + """' 
 sendm = '""" + str(sendm) + """' 
-cm = '""" + str(cm) + "'")
+cm = """ + str(cm) + "")
 
 hotkey_active = False
 

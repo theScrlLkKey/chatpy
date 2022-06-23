@@ -372,7 +372,10 @@ while True:
                     print(str(tellls.keys()))
                     # except Exception as err:
                     #     print(str(err))
-                    smessage = f'Will tell {ttuser}.'
+                    if '!msg' in message:
+                        smessage = f'!msg {username} Will tell {ttuser}.'
+                    else:
+                        smessage = f'Will tell {ttuser}.'
                     message = smessage.encode('utf-8')
                     message = encrypt(message, key)
                     message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
