@@ -36,6 +36,29 @@ def setup():
     print('kjdshdsgfjkhfjdg')
 
 
+# thanks stackoverflow for saving me from an hour long headache
+intervals = (
+    ('weeks', 604800),  # 60 * 60 * 24 * 7
+    ('days', 86400),    # 60 * 60 * 24
+    ('hours', 3600),    # 60 * 60
+    ('minutes', 60),
+    ('seconds', 1),
+)
+
+
+def display_time(seconds, granularity=2):
+    result = []
+
+    for name, count in intervals:
+        value = seconds // count
+        if value:
+            seconds -= value * count
+            if value == 1:
+                name = name.rstrip('s')
+            result.append("{} {}".format(value, name))
+    return ', '.join(result[:granularity])
+
+
 chtname = 'A chatroom'
 chttop = 'Everything :)'
 uservar = ['Webmaster, ']
@@ -149,7 +172,7 @@ while True:
 # message = message.encode('utf-8')
 # message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
 # client_socket.send(message_header + message)
-
+startTime = time.time()
 
 while True:
     try:
@@ -195,7 +218,7 @@ while True:
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                 client_socket.send(message_header + message)
             elif message == '!webmaster commands':
-                smessage = f'!msg {username} Commands: greet, name, topic, myname, time, userlist, about, rules, say <thing to say>, tell <user> <message>, math <equation>, randhex, randnum <number of digits>, rot13 <message>. Put !webmaster before any of these commands. Non-webmaster commands: !msg <username> <message>, !.relog (remove dot), !ping, !.< <status> (remove dot), !.> <username> (remove dot)'
+                smessage = f'!msg {username} Commands: greet, name, topic, myname, time, uptime, userlist, about, rules, say <thing to say>, tell <user> <message>, math <equation>, randhex, randnum <number of digits>, rot13 <message>. Put !webmaster before any of these commands. Non-webmaster commands: !msg <username> <message>, !.relog (remove dot), !ping, !.< <status> (remove dot), !.> <username> (remove dot)'
                 message = smessage.encode('utf-8')
                 message = encrypt(message, key)
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
@@ -236,6 +259,13 @@ while True:
                 named_tuple = time.localtime()  # get struct_time
                 ctime = time.strftime("%m/%d/%Y, %I:%M:%S %p", named_tuple)
                 smessage = 'The time is: ' + ctime
+                message = smessage.encode('utf-8')
+                message = encrypt(message, key)
+                message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+                client_socket.send(message_header + message)
+                client_socket.send(message_header + message)
+            elif message == '!webmaster uptime':
+                smessage = f'Current uptime: {display_time(time.time() - startTime, 5)}'
                 message = smessage.encode('utf-8')
                 message = encrypt(message, key)
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
