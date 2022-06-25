@@ -214,7 +214,7 @@ while True:
             sys.exit()
 
         # We just did not receive anything
-        continue
+        time.sleep(0.05)
 
     except Exception as e:
         # Any other exception - something happened, exit
