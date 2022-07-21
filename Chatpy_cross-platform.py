@@ -5,7 +5,7 @@ import urllib.request
 import subprocess
 import sys
 
-
+# dont send !erelog on error, it is very rare to fix and it will ddos the server lol
 
 def install(package):
     subprocess.check_call([sys.executable, "-m", "pip", "install", package])
