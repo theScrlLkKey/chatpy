@@ -29,6 +29,21 @@ def encrypt(func_mes, func_key):
     return encrypted_data
 
 
+def send_msg(func_msg, send_usr, func_usr=False, func_socket=None, encryptmsg=True):
+    # func user is a list of users, False for all users
+    # send user is user to send as, userheader+user
+    # func socket is the socket to send to
+    func_msg = func_msg.encode('utf-8')
+    if encryptmsg:
+        func_msg = encrypt(func_msg, key)
+    func_header = f'{len(func_msg):<{HEADER_LENGTH}}'.encode('utf-8')
+    if func_usr:
+        func_socket.send(send_usr + func_header + func_msg)
+    else:
+        for func_client_socket in clients:
+            func_client_socket.send(send_usr + func_header + func_msg)
+
+
 def receive_msg(func_socket):
     try:
         func_header = func_socket.recv(HEADER_LENGTH)
@@ -137,15 +152,10 @@ while True:
                         msg_header = f'{len(msg):<{HEADER_LENGTH}}'.encode('utf-8')
                         # only send key to newly connected client
                         notif_socket.send(keyusr_header + keyusr + msg_header + msg)
-                    elif dec_message == '!servusrls':
+                    elif dec_message == ';servusrls':
                         # user list
                         msg = ', '.join(sorted(connectedusers, key=str.lower))
-                        msg = msg.encode('utf-8')
-                        msg = encrypt(msg, key)
-                        msg_header = f'{len(msg):<{HEADER_LENGTH}}'.encode('utf-8')
-                        for client_socket in clients:
-                            client_socket.send(srvusr_header + srvusr + msg_header + msg)
-                    elif # TODO kick command, request ip command, proper pm support,
+                        send_msg(msg, srvusr_header + srvusr)
                     elif ' joined the chat!' in message['data'].decode('utf-8') or ' left the chat!' in message['data'].decode('utf-8'):
                         # dont send these; backwards compatibility
                         pass
