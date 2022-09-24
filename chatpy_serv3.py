@@ -139,12 +139,13 @@ while True:
                         notif_socket.send(keyusr_header + keyusr + msg_header + msg)
                     elif dec_message == '!servusrls':
                         # user list
-                        msg = str(connectedusers)
+                        msg = ', '.join(sorted(connectedusers, key=str.lower))
                         msg = msg.encode('utf-8')
                         msg = encrypt(msg, key)
                         msg_header = f'{len(msg):<{HEADER_LENGTH}}'.encode('utf-8')
                         for client_socket in clients:
                             client_socket.send(srvusr_header + srvusr + msg_header + msg)
+                    elif # TODO kick command, request ip command, proper pm support,
                     elif ' joined the chat!' in message['data'].decode('utf-8') or ' left the chat!' in message['data'].decode('utf-8'):
                         # dont send these; backwards compatibility
                         pass
