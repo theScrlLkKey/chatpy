@@ -30,9 +30,8 @@ def encrypt(func_mes, func_key):
 
 
 def send_msg(func_msg, send_usr, func_socket=None, encryptmsg=True):
-    # func user is a list of users, False for all users
     # send user is user to send as, userheader+user
-    # func socket is the socket to send to
+    # func socket is the socket to send to, none for all sockets
     func_msg = func_msg.encode('utf-8')
     if encryptmsg:
         func_msg = encrypt(func_msg, key)
@@ -145,7 +144,7 @@ while True:
                     user = clients[notif_socket]
                     # print message, if it is not encrypted then dont print it
                     try:
-                        print(f'<{formattedTime}> {user["data"].decode("utf-8")}: {decrypt(message["data"].decode("utf-8"), key)}')
+                        print(f'<{formattedTime}> {user["data"].decode("utf-8")}: {decrypt(message["data"], key).decode("utf-8")}')
                     except cryptography.fernet.InvalidToken:
                         print(f'<{formattedTime}> {user["data"].decode("utf-8")}:* {message["data"].decode("utf-8")}')
 
@@ -161,6 +160,21 @@ while True:
                         time.sleep(0.5)
                         send_msg(keydec, keyusr_header + keyusr, notif_socket, False)
                         print(f'<{formattedTime}> Sent key to {user["data"].decode("utf-8")}')
+                    elif ';kick ' in dec_message:  # add auth
+                        to_kick = dec_message.split(' ')[1]
+                        kick_socket = get_socket_by_user(to_kick)
+                        if kick_socket:
+                            send_msg(f'You have been kicked. Reason: ', srvusr_header + srvusr, kick_socket)
+                            sockets_list.remove(kick_socket)
+                            disconnected_client = clients[kick_socket]["data"].decode("utf-8")
+                            connectedusers.remove(disconnected_client)
+                            del clients[kick_socket]
+                            kick_socket.close()
+                            send_msg(f'{to_kick} has been kicked.', srvusr_header + srvusr)
+                            print(f'<{formattedTime}> {to_kick} kicked by {user["data"].decode("utf-8")} | Reason: ')
+                        else:
+                            send_msg('User does not exist.', srvusr_header + srvusr, notif_socket)
+                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{user["data"].decode("utf-8")}: User does not exist.')
                     elif dec_message == ';usrls':
                         # user list
                         msg = ', '.join(sorted(connectedusers, key=str.lower))
@@ -182,7 +196,7 @@ while True:
                             print(f'<{formattedTime}> {emuusr.decode("utf-8")}|{pm_rusr}: {pm_msg}')
                         else:
                             send_msg('User does not exist.', srvusr_header + srvusr, notif_socket)
-                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{pm_rusr}: User does not exist.')
+                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{user["data"].decode("utf-8")}: User does not exist.')
                     elif ' joined the chat!' in message['data'].decode('utf-8') or ' left the chat!' in message['data'].decode('utf-8'):
                         # dont send these; backwards compatibility
                         pass
