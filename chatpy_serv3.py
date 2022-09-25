@@ -1,6 +1,7 @@
 import time
 import socket
 import select
+import hashlib
 import cryptography.fernet
 from cryptography.fernet import Fernet
 
@@ -14,6 +15,7 @@ loc_ip = socket.gethostbyname(hostname)
 IP = '0.0.0.0'
 clients = {}
 connectedusers = []
+authedusers = []
 keyreqmsgs = ['!req', '!erelog']
 
 
@@ -68,6 +70,7 @@ def get_socket_by_user(func_usr):
 
 # ask for setup
 PORT = int(input('Port: '))
+master_auth = hashlib.sha256(input('Master password: ').encode('utf-8')).hexdigest()  # generate sha256 hash
 
 # create socket
 server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -131,6 +134,8 @@ while True:
                         print(f'<{formattedTime}> {disconnected_client} disconnected.')
                         connectedusers.remove(disconnected_client)
                         del clients[notif_socket]
+                        if disconnected_client in authedusers:
+                            del authedusers[disconnected_client]
                         # notify users
                         msg = disconnected_client + ' has left the chat!'  # ihatethisihatethis
                         msg = msg.encode('utf-8')
@@ -142,13 +147,14 @@ while True:
                                 client_socket.send(message['header'] + message['data'] + msg_header + msg)
                         continue
                     user = clients[notif_socket]
-                    # print message, if it is not encrypted then dont print it
+                    # print message, if it is not encrypted then print it
                     try:
                         print(f'<{formattedTime}> {user["data"].decode("utf-8")}: {decrypt(message["data"], key).decode("utf-8")}')
                     except cryptography.fernet.InvalidToken:
                         print(f'<{formattedTime}> {user["data"].decode("utf-8")}:* {message["data"].decode("utf-8")}')
 
                     # decrypt or decode message
+                    dec_user = user["data"].decode("utf-8")
                     try:
                         dec_message = decrypt(message['data'], key)
                         dec_message = dec_message.decode('utf-8')
@@ -159,7 +165,18 @@ while True:
                         # send key
                         time.sleep(0.5)
                         send_msg(keydec, keyusr_header + keyusr, notif_socket, False)
-                        print(f'<{formattedTime}> Sent key to {user["data"].decode("utf-8")}')
+                        print(f'<{formattedTime}> Sent key to {dec_user}')
+                    elif ';auth ' in dec_message:
+                        # authenticate user
+                        auth_attempt = hashlib.sha256(dec_message.split(' ')[1].encode('utf-8')).hexdigest()
+                        if auth_attempt == master_auth:
+                            authedusers.append(dec_user)
+                            send_msg('You have been authenticated as an admin!', srvusr_header + srvusr, notif_socket)
+                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} You have been authenticated as an admin!')
+                        else:
+                            send_msg('Incorrect password.', srvusr_header + srvusr, notif_socket)
+                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} Incorrect password.')
+
                     elif ';kick ' in dec_message:  # add auth
                         to_kick = dec_message.split(' ')[1]
                         kick_socket = get_socket_by_user(to_kick)
@@ -169,12 +186,14 @@ while True:
                             disconnected_client = clients[kick_socket]["data"].decode("utf-8")
                             connectedusers.remove(disconnected_client)
                             del clients[kick_socket]
+                            if disconnected_client in authedusers:  # unlikely lol
+                                del authedusers[disconnected_client]
                             kick_socket.close()
                             send_msg(f'{to_kick} has been kicked.', srvusr_header + srvusr)
-                            print(f'<{formattedTime}> {to_kick} kicked by {user["data"].decode("utf-8")} | Reason: ')
+                            print(f'<{formattedTime}> {to_kick} kicked by {dec_user} | Reason: ')
                         else:
                             send_msg('User does not exist.', srvusr_header + srvusr, notif_socket)
-                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{user["data"].decode("utf-8")}: User does not exist.')
+                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: User does not exist.')
                     elif dec_message == ';usrls':
                         # user list
                         msg = ', '.join(sorted(connectedusers, key=str.lower))
@@ -189,14 +208,14 @@ while True:
                         pm_socket = get_socket_by_user(pm_rusr)
                         if pm_socket:  # only send if valid user
                             # make private message prefix
-                            emuusr = f'PM from {user["data"].decode("utf-8")}'.encode('utf-8')
+                            emuusr = f'PM from {dec_user}'.encode('utf-8')
                             emuusr_header = f"{len(emuusr):<{HEADER_LENGTH}}".encode('utf-8')
                             # send
                             send_msg(pm_msg, emuusr_header + emuusr, pm_socket)
                             print(f'<{formattedTime}> {emuusr.decode("utf-8")}|{pm_rusr}: {pm_msg}')
                         else:
                             send_msg('User does not exist.', srvusr_header + srvusr, notif_socket)
-                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{user["data"].decode("utf-8")}: User does not exist.')
+                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: User does not exist.')
                     elif ' joined the chat!' in message['data'].decode('utf-8') or ' left the chat!' in message['data'].decode('utf-8'):
                         # dont send these; backwards compatibility
                         pass
@@ -213,6 +232,8 @@ while True:
                 print(f'<{formattedTime}> {disconnected_client} disconnected improperly.')
                 connectedusers.remove(disconnected_client)
                 del clients[notif_socket]
+                if disconnected_client in authedusers:
+                    del authedusers[disconnected_client]
                 # notify of leave
                 try:
                     msg = disconnected_client + ' has left the chat!'
