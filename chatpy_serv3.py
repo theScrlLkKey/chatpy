@@ -169,7 +169,10 @@ while True:
                     elif ';auth ' in dec_message:
                         # authenticate user
                         auth_attempt = hashlib.sha256(dec_message.split(' ')[1].encode('utf-8')).hexdigest()
-                        if auth_attempt == master_auth:
+                        if dec_user in authedusers:
+                            send_msg('You are already an admin!', srvusr_header + srvusr, notif_socket)
+                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} You are already an admin!')
+                        elif auth_attempt == master_auth:
                             authedusers.append(dec_user)
                             send_msg('You have been authenticated as an admin!', srvusr_header + srvusr, notif_socket)
                             print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} You have been authenticated as an admin!')
