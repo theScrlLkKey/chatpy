@@ -114,15 +114,24 @@ while True:
                     sockets_list.append(client_socket)
                     clients[client_socket] = user
                     client_ip, client_port = client_address
-                    connectedusers.append(user['data'].decode('utf-8'))
-                    print(f'<{formattedTime}> {client_ip}:{client_port}|{user["data"].decode("utf-8")} connected')
-                    for client_socket in clients:
-                        if client_socket != notif_socket:
-                            # notify clients of join
-                            msg = user['data'].decode('utf-8') + ' has joined the chat!'
-                            msg = msg.encode('utf-8')
-                            msg_header = f'{len(msg):<{HEADER_LENGTH}}'.encode('utf-8')
-                            client_socket.send(user['header'] + user['data'] + msg_header + msg)
+                    if user['data'].decode('utf-8') in connectedusers:
+                        send_msg(keydec, keyusr_header + keyusr, client_socket, False)  # send key
+                        print(f'<{formattedTime}> {client_ip}:{client_port}|{user["data"].decode("utf-8")} not connected, username in use')
+                        send_msg('That username is in use.', srvusr_header + srvusr, client_socket)
+                        time.sleep(0.1)
+                        client_socket.close()  # only to remove them
+                        sockets_list.remove(client_socket)
+                        del clients[client_socket]
+                    else:
+                        connectedusers.append(user['data'].decode('utf-8'))
+                        print(f'<{formattedTime}> {client_ip}:{client_port}|{user["data"].decode("utf-8")} connected')
+                        for client_socket in clients:
+                            if client_socket != notif_socket:
+                                # notify clients of join
+                                msg = user['data'].decode('utf-8') + ' has joined the chat!'
+                                msg = msg.encode('utf-8')
+                                msg_header = f'{len(msg):<{HEADER_LENGTH}}'.encode('utf-8')
+                                client_socket.send(user['header'] + user['data'] + msg_header + msg)
                 else:
                     # client sent message
                     # contains username + header and message + header
@@ -160,12 +169,16 @@ while True:
                         dec_message = dec_message.decode('utf-8')
                     except cryptography.fernet.InvalidToken:
                         dec_message = message['data'].decode('utf-8')
-                    # check for commands
+                    # send key to new user
                     if dec_message in keyreqmsgs or ' joined the chat!' in dec_message:
                         # send key
                         time.sleep(0.5)
                         send_msg(keydec, keyusr_header + keyusr, notif_socket, False)
                         print(f'<{formattedTime}> Sent key to {dec_user}')
+                    elif ' joined the chat!' in message['data'].decode('utf-8') or ' left the chat!' in message['data'].decode('utf-8'):
+                        # dont send these; backwards compatibility
+                        pass
+                    # check for commands
                     elif ';auth ' in dec_message:
                         # authenticate user
                         auth_attempt = hashlib.sha256(dec_message.split(' ')[1].encode('utf-8')).hexdigest()
@@ -219,9 +232,6 @@ while True:
                         else:
                             send_msg('User does not exist.', srvusr_header + srvusr, notif_socket)
                             print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: User does not exist.')
-                    elif ' joined the chat!' in message['data'].decode('utf-8') or ' left the chat!' in message['data'].decode('utf-8'):
-                        # dont send these; backwards compatibility
-                        pass
                     # relay message
                     else:
                         for client_socket in clients:

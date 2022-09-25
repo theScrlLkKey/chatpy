@@ -132,7 +132,10 @@ while True:
                     print(f'{printTime} |{username}: {message}')
             except IOError as Err:
                 # no new messages
-                if Err.errno != errno.EAGAIN and Err.errno != errno.EWOULDBLOCK:  # cross-platform compatibility
+                if Err.errno == 10054:
+                    print('Disconnected from server.')
+                    close()
+                elif Err.errno != errno.EAGAIN and Err.errno != errno.EWOULDBLOCK:  # cross-platform compatibility
                     print(f'Error: {Err}')
                     close()
                 else:
