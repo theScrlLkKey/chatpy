@@ -29,7 +29,7 @@ def encrypt(func_mes, func_key):
     return encrypted_data
 
 
-def send_msg(func_msg, send_usr, func_usr=False, func_socket=None, encryptmsg=True):
+def send_msg(func_msg, send_usr, func_socket=None, encryptmsg=True):
     # func user is a list of users, False for all users
     # send user is user to send as, userheader+user
     # func socket is the socket to send to
@@ -37,7 +37,7 @@ def send_msg(func_msg, send_usr, func_usr=False, func_socket=None, encryptmsg=Tr
     if encryptmsg:
         func_msg = encrypt(func_msg, key)
     func_header = f'{len(func_msg):<{HEADER_LENGTH}}'.encode('utf-8')
-    if func_usr:
+    if func_socket:
         func_socket.send(send_usr + func_header + func_msg)
     else:
         for func_client_socket in clients:
@@ -51,9 +51,20 @@ def receive_msg(func_socket):
             return False
         func_length = int(func_header.decode('utf-8').strip())
         return {'header': func_header, 'data': func_socket.recv(func_length)}
-    except:
-        # bad programming ik ill figure it out
+    except OSError:
         return False
+
+
+def get_socket_by_user(func_usr):
+    j = 1
+    for i in clients:
+        if clients[sockets_list[j]]['data'].decode('utf-8') == func_usr:
+            return sockets_list[j]
+        else:
+            if not i:
+                print('? how did we get here')
+            j += 1
+    return False
 
 
 # ask for setup
@@ -152,10 +163,22 @@ while True:
                         msg_header = f'{len(msg):<{HEADER_LENGTH}}'.encode('utf-8')
                         # only send key to newly connected client
                         notif_socket.send(keyusr_header + keyusr + msg_header + msg)
-                    elif dec_message == ';servusrls':
+                    elif dec_message == ';usrls':
                         # user list
                         msg = ', '.join(sorted(connectedusers, key=str.lower))
                         send_msg(msg, srvusr_header + srvusr)
+                    elif ';pm ' in dec_message:
+                        pm_rusr = dec_message.split(' ')[1]
+                        pm_msg = dec_message.split(' ', 2)
+                        del pm_msg[0]
+                        del pm_msg[0]
+                        pm_msg = ''.join(pm_msg)
+                        pm_socket = get_socket_by_user(pm_rusr)
+                        print(pm_socket)
+                        # make private message prefix
+                        emuusr = f'PM from {user["data"].decode("utf-8")}'.encode('utf-8')
+                        emuusr_header = f"{len(emuusr):<{HEADER_LENGTH}}".encode('utf-8')
+                        send_msg(pm_msg, emuusr_header + emuusr, pm_socket)
                     elif ' joined the chat!' in message['data'].decode('utf-8') or ' left the chat!' in message['data'].decode('utf-8'):
                         # dont send these; backwards compatibility
                         pass
@@ -187,5 +210,5 @@ while True:
         # with this, nothing can break our code
         time_tuple = time.localtime()
         formattedTime = time.strftime("%H:%M:%S", time_tuple)
-        print(f'<{formattedTime}> ' + str(err))
+        print(f'<{formattedTime}> error: ' + str(err))
         time.sleep(0.05)
