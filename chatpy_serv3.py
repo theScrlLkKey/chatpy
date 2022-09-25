@@ -145,9 +145,9 @@ while True:
                     user = clients[notif_socket]
                     # print message, if it is not encrypted then dont print it
                     try:
-                        print(f'<{formattedTime}> {user["data"].decode("utf-8")}: {decrypt(message["data"], key)}')
+                        print(f'<{formattedTime}> {user["data"].decode("utf-8")}: {decrypt(message["data"].decode("utf-8"), key)}')
                     except cryptography.fernet.InvalidToken:
-                        print(f'<{formattedTime}> {user["data"].decode("utf-8")}: {message["data"].decode("utf-8")}')
+                        print(f'<{formattedTime}> {user["data"].decode("utf-8")}:* {message["data"].decode("utf-8")}')
 
                     # decrypt or decode message
                     try:
@@ -157,16 +157,15 @@ while True:
                         dec_message = message['data'].decode('utf-8')
                     # check for commands
                     if dec_message in keyreqmsgs or ' joined the chat!' in dec_message:
+                        # send key
                         time.sleep(0.5)
-                        msg = keydec
-                        msg = msg.encode('utf-8')
-                        msg_header = f'{len(msg):<{HEADER_LENGTH}}'.encode('utf-8')
-                        # only send key to newly connected client
-                        notif_socket.send(keyusr_header + keyusr + msg_header + msg)
+                        send_msg(keydec, keyusr_header + keyusr, notif_socket, False)
+                        print(f'<{formattedTime}> Sent key to {user["data"].decode("utf-8")}')
                     elif dec_message == ';usrls':
                         # user list
                         msg = ', '.join(sorted(connectedusers, key=str.lower))
-                        send_msg(msg, srvusr_header + srvusr)
+                        send_msg(msg, srvusr_header + srvusr, notif_socket['data'])
+                        print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{notif_socket["data"]}: {msg}')
                     elif ';pm ' in dec_message:
                         pm_rusr = dec_message.split(' ')[1]
                         pm_msg = dec_message.split(' ', 2)
@@ -174,11 +173,16 @@ while True:
                         del pm_msg[0]
                         pm_msg = ''.join(pm_msg)
                         pm_socket = get_socket_by_user(pm_rusr)
-                        print(pm_socket)
-                        # make private message prefix
-                        emuusr = f'PM from {user["data"].decode("utf-8")}'.encode('utf-8')
-                        emuusr_header = f"{len(emuusr):<{HEADER_LENGTH}}".encode('utf-8')
-                        send_msg(pm_msg, emuusr_header + emuusr, pm_socket)
+                        if pm_socket:  # only send if valid user
+                            # make private message prefix
+                            emuusr = f'PM from {user["data"].decode("utf-8")}'.encode('utf-8')
+                            emuusr_header = f"{len(emuusr):<{HEADER_LENGTH}}".encode('utf-8')
+                            # send
+                            send_msg(pm_msg, emuusr_header + emuusr, pm_socket)
+                            print(f'<{formattedTime}> {emuusr.decode("utf-8")}|{pm_rusr}: {pm_msg}')
+                        else:
+                            send_msg('User does not exist.', srvusr_header + srvusr, notif_socket)
+                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{pm_rusr}: User does not exist.')
                     elif ' joined the chat!' in message['data'].decode('utf-8') or ' left the chat!' in message['data'].decode('utf-8'):
                         # dont send these; backwards compatibility
                         pass
