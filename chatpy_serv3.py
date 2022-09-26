@@ -201,6 +201,14 @@ while True:
                         else:
                             send_msg('False', srvusr_header + srvusr, notif_socket)
                             print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} False')
+                    elif dec_message == ';deauth':
+                        if dec_user in authedusers:
+                            authedusers.remove(dec_user)
+                            send_msg('Logged out.', srvusr_header + srvusr, notif_socket)
+                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} Logged out.')
+                        else:
+                            send_msg('You are not an admin.', srvusr_header + srvusr, notif_socket)
+                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} You are not an admin.')
                     elif ';kick ' in dec_message:
                         if dec_user in authedusers:
                             to_kick = dec_message.split(' ')[1]
@@ -216,7 +224,7 @@ while True:
                                 connectedusers.remove(disconnected_client)
                                 del clients[kick_socket]
                                 if disconnected_client in authedusers:  # unlikely lol
-                                    del authedusers[disconnected_client]
+                                    authedusers.remove(disconnected_client)
                                 kick_socket.close()
                                 send_msg(f'{to_kick} has been kicked.', srvusr_header + srvusr)
                                 print(f'<{formattedTime}> {to_kick} kicked by {dec_user} | Reason: {reason_kick}')
