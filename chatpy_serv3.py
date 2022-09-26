@@ -68,6 +68,13 @@ def get_socket_by_user(func_usr):
     return False
 
 
+def admin_msg(func_msg, func_sendas):
+    func_sendas = f'Admin PM from {func_sendas}'.encode('utf-8')
+    func_header = f"{len(func_sendas):<{HEADER_LENGTH}}".encode('utf-8')
+    for func_usr in authedusers:
+        send_msg(func_msg, func_header + func_sendas, get_socket_by_user(func_usr))
+
+
 # ask for setup
 PORT = int(input('Port: '))
 master_auth = hashlib.sha256(input('Master password: ').encode('utf-8')).hexdigest()  # generate sha256 hash
@@ -131,7 +138,9 @@ while True:
                                 msg = user['data'].decode('utf-8') + ' has joined the chat!'
                                 msg = msg.encode('utf-8')
                                 msg_header = f'{len(msg):<{HEADER_LENGTH}}'.encode('utf-8')
-                                client_socket.send(user['header'] + user['data'] + msg_header + msg)
+                                # send as user's username even though we dont use it; could be sent under "server" username
+                                # we will see about the above claim: client_socket.send( + msg_header + msg)
+                                client_socket.send(srvusr_header + srvusr + msg_header + msg)
                 else:
                     # client sent message
                     # contains username + header and message + header
@@ -154,7 +163,8 @@ while True:
                             if client_socket != notif_socket:
                                 # username header, username, message header, message
                                 # send as disconnected user's username even though we dont use it; could be sent under "server" username
-                                client_socket.send(disconnected_header + disconnected_client.encode('utf-8') + msg_header + msg)
+                                # we will see about the above claim: disconnected_header + disconnected_client.encode('utf-8')
+                                client_socket.send(srvusr_header + srvusr + msg_header + msg)
                         continue
                     user = clients[notif_socket]
                     # print message, if it is not encrypted then print it
@@ -187,12 +197,14 @@ while True:
                             send_msg('You are already an admin!', srvusr_header + srvusr, notif_socket)
                             print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} You are already an admin!')
                         elif auth_attempt == master_auth:
+                            admin_msg(f'{dec_user} is now an admin!', srvusr.decode('utf-8'))
                             authedusers.append(dec_user)
                             send_msg('You have been authenticated as an admin!', srvusr_header + srvusr, notif_socket)
                             print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} You have been authenticated as an admin!')
                         else:
                             send_msg('Incorrect password.', srvusr_header + srvusr, notif_socket)
-                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} Incorrect password.')
+                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} Incorrect password ({dec_message.split(" ")[1]})')
+                            admin_msg(f'{dec_user} failed to login as admin, tried: {dec_message.split(" ")[1]}', srvusr.decode("utf-8"))
                     elif ';reqauth ' in dec_message:
                         req_usr = dec_message.split(' ')[1]
                         if req_usr in authedusers:
@@ -206,13 +218,14 @@ while True:
                             authedusers.remove(dec_user)
                             send_msg('Logged out.', srvusr_header + srvusr, notif_socket)
                             print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} Logged out.')
+                            admin_msg(f'{dec_user} is no longer an admin.', srvusr.decode('utf-8'))
                         else:
                             send_msg('You are not an admin.', srvusr_header + srvusr, notif_socket)
                             print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} You are not an admin.')
                     elif ';cgpw ' in dec_message:
                         if dec_user in authedusers:
                             master_auth = hashlib.sha256(dec_message.split(' ')[1].encode('utf-8')).hexdigest()
-                            send_msg('Password changed.', srvusr_header + srvusr, notif_socket)
+                            admin_msg('Password changed.', srvusr.decode("utf-8"))
                             print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: Password changed to {dec_message.split(" ")[1]}')
                         else:
                             send_msg('You do not have permission to use this command.', srvusr_header + srvusr, notif_socket)
@@ -234,6 +247,7 @@ while True:
                                 if disconnected_client in authedusers:  # unlikely lol
                                     authedusers.remove(disconnected_client)
                                 kick_socket.close()
+                                admin_msg(f'{to_kick} has been kicked by {dec_user}. Reason: {reason_kick}', srvusr.decode('utf-8'))
                                 send_msg(f'{to_kick} has been kicked.', srvusr_header + srvusr)
                                 print(f'<{formattedTime}> {to_kick} kicked by {dec_user} | Reason: {reason_kick}')
                             else:
@@ -247,6 +261,14 @@ while True:
                         msg = ', '.join(sorted(connectedusers, key=str.lower))
                         send_msg(msg, srvusr_header + srvusr, notif_socket['data'])
                         print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{notif_socket["data"]}: {msg}')
+                    elif ';apm ' in dec_message:  # admin only chat
+                        if dec_user in authedusers:
+                            apm_msg = dec_message.split(' ')[1]
+                            admin_msg(apm_msg, dec_user)
+                            print(f'<{formattedTime}> Admin PM from {dec_user}|{", ".join(sorted(authedusers, key=str.lower))}: {apm_msg}')
+                        else:
+                            send_msg('You do not have permission to use this command.', srvusr_header + srvusr, notif_socket)
+                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: You do not have permission to use this command.')
                     elif ';pm ' in dec_message:
                         pm_rusr = dec_message.split(' ')[1]
                         pm_msg = dec_message.split(' ', 2)[2]
