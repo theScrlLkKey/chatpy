@@ -139,7 +139,8 @@ while True:
                     if message is False:
                         # client disconnected
                         sockets_list.remove(notif_socket)
-                        disconnected_client = clients[notif_socket]["data"].decode("utf-8")
+                        disconnected_client = clients[notif_socket]['data'].decode('utf-8')
+                        disconnected_header = clients[notif_socket]['header']
                         print(f'<{formattedTime}> {disconnected_client} disconnected.')
                         connectedusers.remove(disconnected_client)
                         del clients[notif_socket]
@@ -153,7 +154,7 @@ while True:
                             if client_socket != notif_socket:
                                 # username header, username, message header, message
                                 # send as disconnected user's username even though we dont use it; could be sent under "server" username
-                                client_socket.send(message['header'] + message['data'] + msg_header + msg)
+                                client_socket.send(disconnected_header + disconnected_client.encode('utf-8') + msg_header + msg)
                         continue
                     user = clients[notif_socket]
                     # print message, if it is not encrypted then print it
@@ -192,6 +193,14 @@ while True:
                         else:
                             send_msg('Incorrect password.', srvusr_header + srvusr, notif_socket)
                             print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} Incorrect password.')
+                    elif ';reqauth ' in dec_message:
+                        req_usr = dec_message.split(' ')[1]
+                        if req_usr in authedusers:
+                            send_msg('True', srvusr_header + srvusr, notif_socket)
+                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} True')
+                        else:
+                            send_msg('False', srvusr_header + srvusr, notif_socket)
+                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} False')
                     elif ';kick ' in dec_message:
                         if dec_user in authedusers:
                             to_kick = dec_message.split(' ')[1]
