@@ -114,7 +114,7 @@ while True:
                     sockets_list.append(client_socket)
                     clients[client_socket] = user
                     client_ip, client_port = client_address
-                    if user['data'].decode('utf-8') in connectedusers:
+                    if user['data'].decode('utf-8') in connectedusers:  # username already online
                         send_msg(keydec, keyusr_header + keyusr, client_socket, False)  # send key
                         print(f'<{formattedTime}> {client_ip}:{client_port}|{user["data"].decode("utf-8")} not connected, username in use')
                         send_msg('That username is in use.', srvusr_header + srvusr, client_socket)
@@ -192,24 +192,31 @@ while True:
                         else:
                             send_msg('Incorrect password.', srvusr_header + srvusr, notif_socket)
                             print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} Incorrect password.')
-
-                    elif ';kick ' in dec_message:  # add auth
-                        to_kick = dec_message.split(' ')[1]
-                        kick_socket = get_socket_by_user(to_kick)
-                        if kick_socket:
-                            send_msg(f'You have been kicked. Reason: ', srvusr_header + srvusr, kick_socket)
-                            sockets_list.remove(kick_socket)
-                            disconnected_client = clients[kick_socket]["data"].decode("utf-8")
-                            connectedusers.remove(disconnected_client)
-                            del clients[kick_socket]
-                            if disconnected_client in authedusers:  # unlikely lol
-                                del authedusers[disconnected_client]
-                            kick_socket.close()
-                            send_msg(f'{to_kick} has been kicked.', srvusr_header + srvusr)
-                            print(f'<{formattedTime}> {to_kick} kicked by {dec_user} | Reason: ')
+                    elif ';kick ' in dec_message:
+                        if dec_user in authedusers:
+                            to_kick = dec_message.split(' ')[1]
+                            try:
+                                reason_kick = dec_message.split(' ', 2)[2]
+                            except IndexError:
+                                reason_kick = ''
+                            kick_socket = get_socket_by_user(to_kick)
+                            if kick_socket:
+                                send_msg(f'You have been kicked. Reason: {reason_kick}', srvusr_header + srvusr, kick_socket)
+                                sockets_list.remove(kick_socket)
+                                disconnected_client = clients[kick_socket]["data"].decode("utf-8")
+                                connectedusers.remove(disconnected_client)
+                                del clients[kick_socket]
+                                if disconnected_client in authedusers:  # unlikely lol
+                                    del authedusers[disconnected_client]
+                                kick_socket.close()
+                                send_msg(f'{to_kick} has been kicked.', srvusr_header + srvusr)
+                                print(f'<{formattedTime}> {to_kick} kicked by {dec_user} | Reason: {reason_kick}')
+                            else:
+                                send_msg('User does not exist.', srvusr_header + srvusr, notif_socket)
+                                print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: User does not exist.')
                         else:
-                            send_msg('User does not exist.', srvusr_header + srvusr, notif_socket)
-                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: User does not exist.')
+                            send_msg('You do not have permission to use this command.', srvusr_header + srvusr, notif_socket)
+                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: You do not have permission to use this command.')
                     elif dec_message == ';usrls':
                         # user list
                         msg = ', '.join(sorted(connectedusers, key=str.lower))
@@ -217,10 +224,7 @@ while True:
                         print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{notif_socket["data"]}: {msg}')
                     elif ';pm ' in dec_message:
                         pm_rusr = dec_message.split(' ')[1]
-                        pm_msg = dec_message.split(' ', 2)
-                        del pm_msg[0]
-                        del pm_msg[0]
-                        pm_msg = ''.join(pm_msg)
+                        pm_msg = dec_message.split(' ', 2)[2]
                         pm_socket = get_socket_by_user(pm_rusr)
                         if pm_socket:  # only send if valid user
                             # make private message prefix
