@@ -145,7 +145,7 @@ while True:
                         connectedusers.remove(disconnected_client)
                         del clients[notif_socket]
                         if disconnected_client in authedusers:
-                            del authedusers[disconnected_client]
+                            authedusers.remove(disconnected_client)
                         # notify users
                         msg = disconnected_client + ' has left the chat!'  # ihatethisihatethis
                         msg = msg.encode('utf-8')
@@ -209,6 +209,14 @@ while True:
                         else:
                             send_msg('You are not an admin.', srvusr_header + srvusr, notif_socket)
                             print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} You are not an admin.')
+                    elif ';cgpw ' in dec_message:
+                        if dec_user in authedusers:
+                            master_auth = hashlib.sha256(dec_message.split(' ')[1].encode('utf-8')).hexdigest()
+                            send_msg('Password changed.', srvusr_header + srvusr, notif_socket)
+                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: Password changed to {dec_message.split(" ")[1]}')
+                        else:
+                            send_msg('You do not have permission to use this command.', srvusr_header + srvusr, notif_socket)
+                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: You do not have permission to use this command.')
                     elif ';kick ' in dec_message:
                         if dec_user in authedusers:
                             to_kick = dec_message.split(' ')[1]
@@ -267,7 +275,7 @@ while True:
                 connectedusers.remove(disconnected_client)
                 del clients[notif_socket]
                 if disconnected_client in authedusers:
-                    del authedusers[disconnected_client]
+                    authedusers.remove(disconnected_client)
                 # notify of leave
                 try:
                     msg = disconnected_client + ' has left the chat!'
