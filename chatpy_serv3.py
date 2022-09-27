@@ -190,6 +190,7 @@ while True:
                         # dont send these; backwards compatibility
                         pass
                     # check for commands
+                    # admin stuff
                     elif ';auth ' in dec_message:
                         # authenticate user
                         auth_attempt = hashlib.sha256(dec_message.split(' ')[1].encode('utf-8')).hexdigest()
@@ -205,14 +206,6 @@ while True:
                             send_msg('Incorrect password.', srvusr_header + srvusr, notif_socket)
                             print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} Incorrect password ({dec_message.split(" ")[1]})')
                             admin_msg(f'{dec_user} failed to login as admin, tried: {dec_message.split(" ")[1]}', srvusr.decode("utf-8"))
-                    elif ';reqauth ' in dec_message:
-                        req_usr = dec_message.split(' ')[1]
-                        if req_usr in authedusers:
-                            send_msg('True', srvusr_header + srvusr, notif_socket)
-                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} True')
-                        else:
-                            send_msg('False', srvusr_header + srvusr, notif_socket)
-                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} False')
                     elif dec_message == ';deauth':
                         if dec_user in authedusers:
                             authedusers.remove(dec_user)
@@ -256,11 +249,6 @@ while True:
                         else:
                             send_msg('You do not have permission to use this command.', srvusr_header + srvusr, notif_socket)
                             print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: You do not have permission to use this command.')
-                    elif dec_message == ';usrls':
-                        # user list
-                        msg = ', '.join(sorted(connectedusers, key=str.lower))
-                        send_msg(msg, srvusr_header + srvusr, notif_socket['data'])
-                        print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{notif_socket["data"]}: {msg}')
                     elif ';apm ' in dec_message:  # admin only chat
                         if dec_user in authedusers:
                             apm_msg = dec_message.split(' ')[1]
@@ -269,6 +257,20 @@ while True:
                         else:
                             send_msg('You do not have permission to use this command.', srvusr_header + srvusr, notif_socket)
                             print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: You do not have permission to use this command.')
+                    elif dec_message == ';reload':
+                        if dec_user in authedusers:
+                            print(f'<{formattedTime}> {dec_user} requested a server restart.')
+                            admin_msg(f'{dec_user} requested a server restart.', srvusr.decode('utf-8'))
+                            # todo
+                        else:
+                            send_msg('You do not have permission to use this command.', srvusr_header + srvusr, notif_socket)
+                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: You do not have permission to use this command.')
+                    # non admin
+                    elif dec_message == ';usrls':
+                        # user list
+                        msg = ', '.join(sorted(connectedusers, key=str.lower))
+                        send_msg(msg, srvusr_header + srvusr, notif_socket['data'])
+                        print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{notif_socket["data"]}: {msg}')
                     elif ';pm ' in dec_message:
                         pm_rusr = dec_message.split(' ')[1]
                         pm_msg = dec_message.split(' ', 2)[2]
@@ -283,6 +285,14 @@ while True:
                         else:
                             send_msg('User does not exist.', srvusr_header + srvusr, notif_socket)
                             print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: User does not exist.')
+                    elif ';reqauth ' in dec_message:
+                        req_usr = dec_message.split(' ')[1]
+                        if req_usr in authedusers:
+                            send_msg('True', srvusr_header + srvusr, notif_socket)
+                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} True')
+                        else:
+                            send_msg('False', srvusr_header + srvusr, notif_socket)
+                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} False')
                     # relay message
                     else:
                         for client_socket in clients:
