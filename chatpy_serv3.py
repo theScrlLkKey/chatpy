@@ -1,3 +1,4 @@
+import os
 import time
 import socket
 import select
@@ -92,6 +93,7 @@ keyusr_header = f"{len(keyusr):<{HEADER_LENGTH}}".encode('utf-8')
 # server username
 srvusr = '#server#'.encode('utf-8')
 srvusr_header = f"{len(srvusr):<{HEADER_LENGTH}}".encode('utf-8')
+blocked_usernames = [srvusr.decode('utf-8'), ' ', '']
 
 # generate key
 key = Fernet.generate_key()
@@ -121,21 +123,23 @@ while True:
                     sockets_list.append(client_socket)
                     clients[client_socket] = user
                     client_ip, client_port = client_address
-                    if user['data'].decode('utf-8') in connectedusers:  # username already online
+                    dec_user = user["data"].decode("utf-8")
+                    # username already online, or username is blocked
+                    if dec_user in connectedusers or dec_user in blocked_usernames or 'PM from' in dec_user:
                         send_msg(keydec, keyusr_header + keyusr, client_socket, False)  # send key
-                        print(f'<{formattedTime}> {client_ip}:{client_port}|{user["data"].decode("utf-8")} not connected, username in use')
-                        send_msg('That username is in use.', srvusr_header + srvusr, client_socket)
+                        print(f'<{formattedTime}> {client_ip}:{client_port}|{dec_user} not connected, username in use or blocked')
+                        send_msg('That username is in use or not allowed.', srvusr_header + srvusr, client_socket)
                         time.sleep(0.1)
                         client_socket.close()  # only to remove them
                         sockets_list.remove(client_socket)
                         del clients[client_socket]
                     else:
-                        connectedusers.append(user['data'].decode('utf-8'))
+                        connectedusers.append(dec_user)
                         print(f'<{formattedTime}> {client_ip}:{client_port}|{user["data"].decode("utf-8")} connected')
                         for client_socket in clients:
                             if client_socket != notif_socket:
                                 # notify clients of join
-                                msg = user['data'].decode('utf-8') + ' has joined the chat!'
+                                msg = dec_user + ' has joined the chat!'
                                 msg = msg.encode('utf-8')
                                 msg_header = f'{len(msg):<{HEADER_LENGTH}}'.encode('utf-8')
                                 # send as user's username even though we dont use it; could be sent under "server" username
@@ -173,8 +177,8 @@ while True:
                     except cryptography.fernet.InvalidToken:
                         print(f'<{formattedTime}> {user["data"].decode("utf-8")}:* {message["data"].decode("utf-8")}')
 
-                    # decrypt or decode message
                     dec_user = user["data"].decode("utf-8")
+                    # decrypt or decode message
                     try:
                         dec_message = decrypt(message['data'], key)
                         dec_message = dec_message.decode('utf-8')
@@ -257,11 +261,11 @@ while True:
                         else:
                             send_msg('You do not have permission to use this command.', srvusr_header + srvusr, notif_socket)
                             print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: You do not have permission to use this command.')
-                    elif dec_message == ';reload':
+                    elif ';reqinfo ' in dec_message:
                         if dec_user in authedusers:
-                            print(f'<{formattedTime}> {dec_user} requested a server restart.')
-                            admin_msg(f'{dec_user} requested a server restart.', srvusr.decode('utf-8'))
-                            # todo
+                            req_usr = dec_message.split(' ')[1]
+                            send_msg(str(get_socket_by_user(req_usr)), srvusr_header + srvusr, notif_socket)
+                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} {str(get_socket_by_user(req_usr))}')
                         else:
                             send_msg('You do not have permission to use this command.', srvusr_header + srvusr, notif_socket)
                             print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: You do not have permission to use this command.')
@@ -285,6 +289,8 @@ while True:
                         else:
                             send_msg('User does not exist.', srvusr_header + srvusr, notif_socket)
                             print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: User does not exist.')
+                    elif dec_message == ';ping':
+                        send_msg('Pong! Did you mean !ping?', srvusr_header + srvusr, notif_socket)
                     elif ';reqauth ' in dec_message:
                         req_usr = dec_message.split(' ')[1]
                         if req_usr in authedusers:
