@@ -273,8 +273,8 @@ while True:
                     elif dec_message == ';usrls':
                         # user list
                         msg = ', '.join(sorted(connectedusers, key=str.lower))
-                        send_msg(msg, srvusr_header + srvusr, notif_socket['data'])
-                        print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{notif_socket["data"]}: {msg}')
+                        send_msg(msg, srvusr_header + srvusr, notif_socket)
+                        print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: {msg}')
                     elif ';pm ' in dec_message:
                         pm_rusr = dec_message.split(' ')[1]
                         pm_msg = dec_message.split(' ', 2)[2]
