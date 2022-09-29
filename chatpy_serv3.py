@@ -271,7 +271,7 @@ while True:
                     # non admin
                     elif dec_message == ';usrls':
                         # user list
-                        msg = ', '.join(sorted(connectedusers, key=str.lower))
+                        msg = f'Users online - {", ".join(sorted(connectedusers, key=str.lower))} - Total: {len(connectedusers)}'
                         send_msg(msg, srvusr_header + srvusr, notif_socket)
                         print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: {msg}')
                     elif ';pm ' in dec_message:
