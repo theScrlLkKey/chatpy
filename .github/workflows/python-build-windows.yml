@@ -1,12 +1,12 @@
-name: Build for windows
+name: _V2_ Build for windows
 
 on:
   push:
       paths:
-      - 'Chatpy_windows.py'
+      - 'v2/client/Chatpy_windows.py'
   pull_request:
       paths:
-      - 'Chatpy_windows.py'
+      - 'v2/client/Chatpy_windows.py'
   workflow_dispatch:
 
 permissions:
@@ -29,16 +29,16 @@ jobs:
         python -m pip install nuitka ordered-set zstandard pynput pythonping cryptography plyer
     - name: Compile
       run: |
-        python -m nuitka --standalone --assume-yes-for-downloads Chatpy_windows.py
-        ren Chatpy_windows.dist Chatpy_windows
+        python -m nuitka --standalone --assume-yes-for-downloads v2/client/Chatpy_windows.py
+        ren v2/client/Chatpy_windows.dist v2/client/Chatpy_windows
         
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.1.0
       with:
         # Artifact name
-        name: Chatpy_windows
+        name: _V2_ Chatpy_windows
         # A file, directory or wildcard pattern that describes what to upload
-        path: Chatpy_windows
+        path: v2/client/Chatpy_windows
         # The desired behavior if no files are found using the provided path.
         retention-days: 90
 
