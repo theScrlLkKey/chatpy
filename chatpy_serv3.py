@@ -124,7 +124,7 @@ while True:
                     client_ip, client_port = client_address
                     dec_user = user["data"].decode("utf-8")
                     # username already online, or username is blocked
-                    if dec_user in connectedusers or dec_user in blocked_usernames or 'PM from' in dec_user:
+                    if dec_user in connectedusers or dec_user in blocked_usernames or 'PM from' in dec_user or len(dec_user) > 25:
                         send_msg(keydec, keyusr_header + keyusr, client_socket, False)  # send key
                         print(f'<{formattedTime}> {client_ip}:{client_port}|{dec_user} not connected, username in use or blocked')
                         send_msg('That username is in use or not allowed.', srvusr_header + srvusr, client_socket)
