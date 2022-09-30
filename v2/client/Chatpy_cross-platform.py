@@ -247,7 +247,7 @@ def get_sendmsg():
         sttime += 360
 
 
-path = 'config.txt'
+path = '../../client/config.txt'
 
 HEADER_LENGTH = 10
 

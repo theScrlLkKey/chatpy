@@ -53,7 +53,7 @@ def ping(destToPing):
     return (ptime)
 
 
-path = 'config.txt'
+path = '../client/config.txt'
 
 HEADER_LENGTH = 10
 

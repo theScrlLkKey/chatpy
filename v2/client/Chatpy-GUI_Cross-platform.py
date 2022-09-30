@@ -1,21 +1,45 @@
 from threading import Thread
-import tkinter as tk
 import socket
 import errno
 import time
 import urllib.request
-from cryptography.fernet import Fernet
-from pythonping import ping
-import ctypes
-import plyer.platforms.win.notification
-from sys import exit
+import subprocess
+import sys
 
-def getWindow():
-    hwnd = ctypes.windll.user32.GetForegroundWindow()
-    length = ctypes.windll.user32.GetWindowTextLengthW(hwnd)
-    buff = ctypes.create_unicode_buffer(length + 1)
-    ctypes.windll.user32.GetWindowTextW(hwnd, buff, length + 1)
-    return hwnd
+
+def install(package):
+    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+
+
+try:
+    from cryptography.fernet import Fernet
+except ModuleNotFoundError:
+    doinst = input('"cryptography" module not found. Would you like to install it now? (Y/n) ').lower()
+    if doinst == 'y' or doinst == '':
+        install('cryptography')
+    else:
+        input('Please install "cryptography". Press enter to exit...')
+        exit()
+
+try:
+    from pythonping import ping
+except ModuleNotFoundError:
+    doinst = input('"pythonping" module not found. Would you like to install it now? (Y/n) ').lower()
+    if doinst == 'y' or doinst == '':
+        install('pythonping')
+    else:
+        input('Please install "pythonping". Press enter to exit...')
+        exit()
+
+try:
+    import tkinter as tk
+except ModuleNotFoundError:
+    doinst = input('"tkinter" module not found. Would you like to install it now? (Y/n) ').lower()
+    if doinst == 'y' or doinst == '':
+        install('tkinter')
+    else:
+        input('Please install "tkinter". Press enter...')
+        exit()
 
 
 def encrypt(message, key):
@@ -55,25 +79,18 @@ def printtogui(msg):
     msg_box.see(tk.END)
     msg_box.configure(state='disabled')
 
-# def inputfromgui(prompt): hell
-#     global inputask
-#     msg_box.configure(state='normal')
-#     msg_box.insert(tk.END, prompt)
-#     msg_box.see(tk.END)
-#     msg_box.configure(state='disabled')
-#     inputask = True
-#     while inputask:
-#         msg_box.configure(state='normal')
-#         msg_box.insert(tk.END, 'prompt')
-#         msg_box.see(tk.END)
-#         msg_box.configure(state='disabled')
-#
-#     out = str(my_msg.get())
-#     my_msg.set("")
-#
-#     printtogui(out)
-#
-#     return out
+def inputfromgui(prompt):
+    msg_box.configure(state='normal')
+    msg_box.insert(tk.END, prompt)
+    msg_box.see(tk.END)
+    msg_box.configure(state='disabled')
+
+    out = str(my_msg.get())
+    my_msg.set("")
+
+    printtogui(out)
+
+    return out
 
 
 def receive():
@@ -106,7 +123,6 @@ def receive():
                 message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                 client_socket.send(message_header + message)
                 print('Disconnected. You were idle for too long.')
-                top.quit()
                 client_socket.close()
                 input('Press enter to exit...')
                 on_closing()
@@ -133,7 +149,6 @@ def receive():
                     # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
                     if not len(username_header):
                         print('Connection closed by the server')
-                        top.quit()
                         input('Press enter to exit...')
                         on_closing()
 
@@ -176,7 +191,6 @@ def receive():
                                     # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
                                     if not len(username_header):
                                         print('Connection closed by the server')
-                                        top.quit()
                                         input('Press enter to exit...')
                                         on_closing()
 
@@ -209,7 +223,6 @@ def receive():
                         message = encrypt(message, key)
                         message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                         client_socket.send(message_header + message)
-                        top.quit()
                         client_socket.close()
                         input('Press enter to exit...')
                         on_closing()
@@ -234,7 +247,6 @@ def receive():
                         message = message.encode('utf-8')
                         message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
                         client_socket.send(message_header + message)
-                        top.quit()
                         client_socket.close()
                         input('Press enter to exit...')
                         on_closing()
@@ -252,7 +264,6 @@ def receive():
                                 # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
                                 if not len(username_header):
                                     print('Connection closed by the server')
-                                    top.quit()
                                     input('Press enter to exit...')
                                     on_closing()
 
@@ -328,9 +339,9 @@ def receive():
                                     printtogui(f'All posts, sorted old to new: \n{newline.join(reversed(message))}')
                                 else:
                                     printtogui(f'''{print_time_str} |Private message from {username}{sep} {', '.join(message)}''')
-                                    if not getWindow() == curhwnd:
-                                        plyer.platforms.win.notification.instance().notify(
-                                            title=f'Private message from: {username} | Chatpy', message=', '.join(message), timeout=3)
+                                    # if not getWindow() == curhwnd:
+                                    #     plyer.platforms.win.notification.instance().notify(
+                                    #         title=f'Private message from: {username} | Chatpy', message=', '.join(message), timeout=3)
                         except:
                             continue
 
@@ -342,13 +353,13 @@ def receive():
                         printtogui(f'{print_time_str} |⃰ {username} {message.split("/me ")[1]}')
                     elif f'@{my_username}' in message:
                         printtogui(f'{print_time_str} |{username}{sep} {message}')
-                        try:
-                            if not getWindow() == curhwnd:
-                                plyer.platforms.win.notification.instance().notify(title=f'{username} | Chatpy', message=message, timeout=3)
-                            # toaster.show_toast(f'{username} | Chatpy', message, icon_path=None, duration=3, threaded=False)
-                        except Exception as e:
-                            print(e)
-                            input('... ')
+                        # try:
+                        #     if not getWindow() == curhwnd:
+                        #         plyer.platforms.win.notification.instance().notify(title=f'{username} | Chatpy', message=message, timeout=3)
+                        #     # toaster.show_toast(f'{username} | Chatpy', message, icon_path=None, duration=3, threaded=False)
+                        # except Exception as e:
+                        #     print(e)
+                        #     input('... ')
 
                     elif 'joined the chat!' in message or 'left the chat!' in message:
                         printtogui(f'{print_time_str} |Server{sep} {message}')
@@ -364,7 +375,6 @@ def receive():
                 # If we got different error code - something happened
                 if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK:
                     print('Reading error: {}'.format(str(e)))
-                    top.quit()
                     client_socket.close()
                     input('Press enter to exit...')
                     on_closing()
@@ -376,13 +386,11 @@ def receive():
                 # Any other exception - something happened, exit
                 print('Error: ' + str(e))
                 client_socket.close()
-                top.quit()
                 input('Press enter to exit...')
                 on_closing()
         except Exception as e:
             # Any other exception - something happened, exit
             print('Error: ' + str(e))
-            top.quit()
             client_socket.close()
             input('Press enter to exit...')
             on_closing()
@@ -394,7 +402,6 @@ def send(event=None):
     global key
     global sttime
     global stimef
-    global inputask
     global username
     global usrstatus
     global trytoreauth
@@ -404,8 +411,6 @@ def send(event=None):
     global username_header
     global username_length
     try:
-
-
         named_tuple = time.localtime()  # get struct_time
         print_time_str = time.strftime("%I:%M%p", named_tuple)
 
@@ -440,7 +445,6 @@ def send(event=None):
                     # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
                     if not len(username_header):
                         print('Connection closed by the server')
-                        top.quit()
                         input('Press enter to exit...')
                         on_closing()
 
@@ -478,7 +482,7 @@ sep = '""" + str(sep) + """'
 stlent = '""" + str(stlent) + """' 
 hbc = '""" + str(hbc) + """' 
 sendm = '""" + str(sendm) + """' 
-cm = """ + str(cm) + "")
+cm = '""" + str(cm) + "'")
             else:
                 cm = False
                 top.configure(bg='white')
@@ -494,7 +498,7 @@ sep = '""" + str(sep) + """'
 stlent = '""" + str(stlent) + """' 
 hbc = '""" + str(hbc) + """' 
 sendm = '""" + str(sendm) + """' 
-cm = """ + str(cm) + "")
+cm = '""" + str(cm) + "'")
 
 
         elif message == '!relog':
@@ -513,7 +517,6 @@ cm = """ + str(cm) + "")
                     # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
                     if not len(username_header):
                         print('Connection closed by the server')
-                        top.quit()
                         input('Press enter to exit...')
                         on_closing()
 
@@ -547,9 +550,10 @@ cm = """ + str(cm) + "")
 
             elif message == '/post list':
                 message = '/post list_int'
-            # elif message == '/post new':
-            #     printtogui('Post syntax: /post new <post> ;;; <title>')
-                # message = f'/post new {post} ;;; {title}'
+            elif message == '/post new':
+                title = input('Post title: ')
+                post = input('Write post:\n')
+                message = f'/post new {post} ;;; {title}'
             printtogui(f'{print_time_str} |{my_username}{sep} {message}')
             # Encode message to bytes, prepare header and convert to bytes, like for username above, then send
             message = message.encode('utf-8')
@@ -574,7 +578,6 @@ cm = """ + str(cm) + "")
                         # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
                         if not len(username_header):
                             print('Connection closed by the server')
-                            top.quit()
                             input('Press enter to exit...')
                             on_closing()
 
@@ -613,14 +616,10 @@ cm = """ + str(cm) + "")
 
 def on_closing(event=None):
     global killed
-    try:
-        top.destroy()
-        killed = True
-        receive_thread.join()
-    except:
-        pass
+    top.destroy()
+    killed = True
+    receive_thread.join()
     exit()
-
 
 
 killed = False
@@ -629,7 +628,7 @@ killed = False
 
 # begin chatroom code
 
-path = 'config.txt'
+path = '../../client/config.txt'
 
 HEADER_LENGTH = 10
 
@@ -670,7 +669,7 @@ sep = '""" + str(sep) + """'
 stlent = '""" + str(stlent) + """' 
 hbc = '""" + str(hbc) + """' 
 sendm = '""" + str(sendm) + """' 
-cm = """ + str(cm) + "")
+cm = '""" + str(cm) + "'")
 
 
 else:
@@ -683,7 +682,7 @@ else:
             print('Port must be a number.')
 
     sep = input('Separator between username and message (Eg. Tim>> hi or Tim: hi): ')
-    sendm = ''
+    sendm = input('Use modern (ctrl+shift) or legacy (ctrl+c, NOT SUPPORTED IN THIS VERSION) shortcut to enter send mode? (M/l): ').lower()
     if sendm == '':
         sendm = 'm'
     hbc = input('Hide (most) bot commands? (y/N): ').lower()
@@ -697,13 +696,10 @@ sep = '""" + str(sep) + """'
 stlent = '""" + str(stlent) + """' 
 hbc = '""" + str(hbc) + """' 
 sendm = '""" + str(sendm) + """' 
-cm = """ + str(cm) + "")
+cm = '""" + str(cm) + "'")
 
 # my_username = input("Username: ")
-if cm == 'True':  # backwards compatibility or smth
-    cm = True
-elif cm == 'False':
-    cm = False
+
 # Create a socket
 # socket.AF_INET - address family, IPv4, some otehr possible are AF_INET6, AF_BLUETOOTH, AF_UNIX
 # socket.SOCK_STREAM - TCP, conection-based, socket.SOCK_DGRAM - UDP, connectionless, datagrams, socket.SOCK_RAW - raw IP packets
@@ -732,7 +728,7 @@ sep = '""" + str(sep) + """'
 stlent = '""" + str(stlent) + """' 
 hbc = '""" + str(hbc) + """' 
 sendm = '""" + str(sendm) + """' 
-cm = """ + str(cm) + "")
+cm = '""" + str(cm) + "'")
 
 hotkey_active = False
 
@@ -742,7 +738,7 @@ elif sendm == 'l':
     shct = 'Ctrl + C'
 
 print('Connected to ' + IP + ':' + str(PORT) + ' (Ping: ' + str(intping(
-    IP)) + f'ms)! Use !msg <username> <message> to send a private mesage, use @<username> to ping, use !color to switch color schemes, and type exit to quit.')
+    IP)) + f'ms)! Press {shct} to talk, use !msg <username> <message> to send a private mesage, use @<username> to ping, use !color to switch color schemes, and type exit to quit.')
 my_username = input("Username: ")
 my_username = my_username.replace(' ', '_')
 
@@ -847,12 +843,10 @@ else:
     send_button.configure(bg='white', foreground='black')
     scrollbar.configure(bg='white')
 printtogui('Connected to ' + IP + ':' + str(PORT) + ' (Ping: ' + str(intping(
-    IP)) + f'ms)! Use !msg <username> <message> to send a private mesage, use @<username> to ping, use !color to switch color schemes, and type exit to quit.')
+    IP)) + f'ms)! Press {shct} to talk, use !msg <username> <message> to send a private mesage, use @<username> to ping, use !color to switch color schemes, and type exit to quit.')
 
 receive_thread = Thread(target=receive)
 receive_thread.start()
 top.lift()
 top.focus_force()
-# get current hwnd hopefully
-curhwnd = getWindow()
 tk.mainloop()
