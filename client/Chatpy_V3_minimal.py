@@ -1,6 +1,7 @@
 import time
 import errno
 import socket
+import pickle
 import cryptography.fernet
 from cryptography.fernet import Fernet
 
@@ -10,6 +11,8 @@ from cryptography.fernet import Fernet
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 HEADER_LENGTH = 10
 printTime = 'null'
+IP = '127.0.0.1'
+PORT = 1234
 
 
 def encrypt(func_mes, func_key):
@@ -38,15 +41,26 @@ def send_message(func_msg, func_enc=True):
     client_socket.send(func_msg_header + func_msg)
 
 
+# attempt to load saved ip/port
+try:
+    with open('chatpy.conf', 'rb') as file:
+        IP, PORT, loaded_username = pickle.load(file)
+    use_saved = input(f'Saved connection found ({IP}:{PORT})! Use it (y/n)? ').lower()
+    use_savednm = input(f'Saved username found ({loaded_username})! Use it (y/n)? ').lower()
+except FileNotFoundError:
+    use_saved = 'n'
+    use_savednm = 'n'
 # ask for ip and port
-# todo: load from file
-IP = str(input('IP address/hostname: '))
-while True:
-    try:
-        PORT = int(input('Port: '))
-        break
-    except ValueError:
-        print('Port must be a number.')
+if use_saved == 'y' or use_saved == '':
+    pass
+else:
+    IP = str(input('IP address/hostname: '))
+    while True:
+        try:
+            PORT = int(input('Port: '))
+            break
+        except ValueError:
+            print('Port must be a number.')
 
 # connect
 while True:
@@ -66,8 +80,14 @@ client_socket.setblocking(False)
 print(f'Connected to {IP}:{PORT}! Type exit to quit, and ctrl+c to send a message.')
 
 # setup username
-cli_username = input('Username: ')
-cli_username = cli_username.replace(' ', '_')  # ensure that there isnt any spaces
+if use_savednm == 'y' or use_savednm == '':
+    cli_username = loaded_username
+else:
+    cli_username = input('Username: ')
+    cli_username = cli_username.replace(' ', '_')  # ensure that there isnt any spaces
+with open('chatpy.conf', 'wb') as file:  # save data
+    pickle.dump([IP, PORT, cli_username], file)
+
 username = cli_username.encode('utf-8')
 username_header = f"{len(username):<{HEADER_LENGTH}}".encode('utf-8')
 client_socket.send(username_header + username)
