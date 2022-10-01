@@ -74,7 +74,7 @@ client_socket.send(username_header + username)
 
 # authenticate
 auth_attempt = 10
-send_message('!req')
+send_message(';req')
 while username != 'enc_distr':
     try:
         username_header = client_socket.recv(HEADER_LENGTH)

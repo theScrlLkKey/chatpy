@@ -132,7 +132,6 @@ while True:
                         sockets_list.remove(client_socket)
                         del clients[client_socket]
                     else:
-                        connectedusers.append(dec_user)
                         print(f'<{formattedTime}> {client_ip}:{client_port}|{user["data"].decode("utf-8")} connected')
                         for client_socket in clients:
                             if client_socket != notif_socket:
@@ -189,8 +188,10 @@ while True:
                             time.sleep(0.5)
                             send_msg(keydec, keyusr_header + keyusr, notif_socket, False)
                             print(f'<{formattedTime}> Sent key to {dec_user}')
+                            # user is now properly connected
+                            connectedusers.append(dec_user)
                     elif ' joined the chat!' in message['data'].decode('utf-8') or ' left the chat!' in message['data'].decode('utf-8'):
-                        # dont send these; backwards compatibility
+                        # v2 connected, send warning
                         pass
                     # check for commands
                     # admin stuff
