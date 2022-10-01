@@ -89,7 +89,7 @@ while username != 'enc_distr':
         username_length = int(username_header.decode('utf-8').strip())
         username = client_socket.recv(username_length).decode('utf-8')
         if auth_attempt < 1:
-            print('Unable to authenticate')
+            print('Unable to secure connection')
             close()
         auth_attempt -= 1
     except IOError as Err:
@@ -99,7 +99,7 @@ message_header = client_socket.recv(HEADER_LENGTH)
 message_length = int(message_header.decode('utf-8').strip())
 message = client_socket.recv(message_length).decode('utf-8')
 key = message
-print('Authenticated!')
+print('Secured!')
 
 # start mainloop | this is gonna be hell
 while True:
