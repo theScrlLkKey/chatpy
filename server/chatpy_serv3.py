@@ -180,9 +180,9 @@ while True:
                         dec_message = decrypt(message['data'], key)
                         dec_message = dec_message.decode('utf-8')
                     except cryptography.fernet.InvalidToken:
-                        dec_message = message['data'].decode('utf-8')
+                        dec_message = ''
                     # send key to new user
-                    if dec_message == ';req' or ' joined the chat!' in dec_message:
+                    if message['data'].decode('utf-8') == ';req':
                         if dec_user not in connectedusers:
                             # send key
                             time.sleep(0.5)
@@ -190,8 +190,19 @@ while True:
                             print(f'<{formattedTime}> Sent key to {dec_user}')
                             # user is now properly connected
                             connectedusers.append(dec_user)
-                    elif ' joined the chat!' in message['data'].decode('utf-8') or ' left the chat!' in message['data'].decode('utf-8'):
-                        # v2 connected, send warning
+                    elif ' joined the chat!' in message['data'].decode('utf-8'):
+                        if dec_user not in connectedusers:
+                            # send key
+                            time.sleep(0.5)
+                            send_msg(keydec, keyusr_header + keyusr, notif_socket, False)
+                            print(f'<{formattedTime}> Sent key to {dec_user}')
+                            # user is now properly connected
+                            connectedusers.append(dec_user)
+                        print(f'<{formattedTime}> {dec_user} is using V2 client')
+                        time.sleep(0.2)
+                        send_msg('You are using a V2 client. You may encounter problems.', srvusr_header + srvusr, notif_socket)
+                    elif ' left the chat!' in message['data'].decode('utf-8'):
+                        # backwards compatibility
                         pass
                     # check for commands
                     # admin stuff
@@ -299,7 +310,9 @@ while True:
                         else:
                             send_msg('False', srvusr_header + srvusr, notif_socket)
                             print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user} False')
-                    # relay message
+                    # relay message'
+                    elif dec_message.strip(' ') == '':
+                        pass
                     else:
                         for client_socket in clients:
                             if client_socket != notif_socket:
