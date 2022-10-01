@@ -15,6 +15,7 @@ loc_ip = socket.gethostbyname(hostname)
 IP = '0.0.0.0'
 clients = {}
 connectedusers = []
+connectedbots = []
 authedusers = []
 
 
@@ -156,6 +157,8 @@ while True:
                         del clients[notif_socket]
                         if disconnected_client in authedusers:
                             authedusers.remove(disconnected_client)
+                        if disconnected_client in connectedbots:
+                            connectedbots.remove(disconnected_client)
                         # notify users
                         msg = disconnected_client + ' has left the chat!'  # ihatethisihatethis
                         msg = msg.encode('utf-8')
@@ -190,6 +193,15 @@ while True:
                             print(f'<{formattedTime}> Sent key to {dec_user}')
                             # user is now properly connected
                             connectedusers.append(dec_user)
+                    # if user is bot, add to bot list
+                    if message['data'].decode('utf-8') == ';botreq':
+                        if dec_user not in connectedbots:
+                            # send key
+                            time.sleep(0.5)
+                            send_msg(keydec, keyusr_header + keyusr, notif_socket, False)
+                            print(f'<{formattedTime}> Sent key to {dec_user}')
+                            # user is now properly connected
+                            connectedbots.append(dec_user)
                     elif ' joined the chat!' in message['data'].decode('utf-8'):
                         if dec_user not in connectedusers:
                             # send key
@@ -254,6 +266,8 @@ while True:
                                 del clients[kick_socket]
                                 if disconnected_client in authedusers:  # unlikely lol
                                     authedusers.remove(disconnected_client)
+                                if disconnected_client in connectedbots:
+                                    connectedbots.remove(disconnected_client)
                                 kick_socket.close()
                                 admin_msg(f'{to_kick} has been kicked by {dec_user}. Reason: {reason_kick}', srvusr.decode('utf-8'))
                                 send_msg(f'{to_kick} has been kicked.', srvusr_header + srvusr)
@@ -264,7 +278,15 @@ while True:
                         else:
                             send_msg('You do not have permission to use this command.', srvusr_header + srvusr, notif_socket)
                             print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: You do not have permission to use this command.')
-                    elif ';apm ' in dec_message:  # admin only chat
+                    elif dec_message == ';admins':  # admin only chat
+                        if dec_user in authedusers:
+                            msg = f'Admins online - {", ".join(sorted(authedusers, key=str.lower))} - Total: {len(authedusers)}'
+                            send_msg(msg, srvusr_header + srvusr, notif_socket)
+                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: {msg}')
+                        else:
+                            send_msg('You do not have permission to use this command.', srvusr_header + srvusr, notif_socket)
+                            print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: You do not have permission to use this command.')
+                    elif ';apm ' in dec_message:  # admin userlist
                         if dec_user in authedusers:
                             apm_msg = dec_message.split(' ')[1]
                             admin_msg(apm_msg, dec_user)
@@ -286,6 +308,11 @@ while True:
                         msg = f'Users online - {", ".join(sorted(connectedusers, key=str.lower))} - Total: {len(connectedusers)}'
                         send_msg(msg, srvusr_header + srvusr, notif_socket)
                         print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: {msg}')
+                    elif dec_message == ';botls':
+                        # user list
+                        msg = f'Bots online - {", ".join(sorted(connectedbots, key=str.lower))} - Total: {len(connectedbots)}'
+                        send_msg(msg, srvusr_header + srvusr, notif_socket)
+                        print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: {msg}')
                     elif ';pm ' in dec_message:
                         pm_rusr = dec_message.split(' ')[1]
                         pm_msg = dec_message.split(' ', 2)[2]
@@ -301,7 +328,7 @@ while True:
                             send_msg('User does not exist.', srvusr_header + srvusr, notif_socket)
                             print(f'<{formattedTime}> {srvusr.decode("utf-8")}|{dec_user}: User does not exist.')
                     elif dec_message == ';ping':
-                        send_msg('Pong! Did you mean !ping?', srvusr_header + srvusr, notif_socket)
+                        send_msg('Pong! Did you mean /ping?', srvusr_header + srvusr, notif_socket)
                     elif ';reqauth ' in dec_message:
                         req_usr = dec_message.split(' ')[1]
                         if req_usr in authedusers:
@@ -327,6 +354,8 @@ while True:
                 del clients[notif_socket]
                 if disconnected_client in authedusers:
                     authedusers.remove(disconnected_client)
+                if disconnected_client in connectedbots:
+                    connectedbots.remove(disconnected_client)
                 # notify of leave
                 try:
                     msg = disconnected_client + ' has left the chat!'
