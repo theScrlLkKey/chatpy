@@ -16,7 +16,6 @@ IP = '0.0.0.0'
 clients = {}
 connectedusers = []
 authedusers = []
-keyreqmsgs = ['!req', '!erelog']
 
 
 def decrypt(enc_data, func_key):
@@ -184,11 +183,12 @@ while True:
                     except cryptography.fernet.InvalidToken:
                         dec_message = message['data'].decode('utf-8')
                     # send key to new user
-                    if dec_message in keyreqmsgs or ' joined the chat!' in dec_message:
-                        # send key
-                        time.sleep(0.5)
-                        send_msg(keydec, keyusr_header + keyusr, notif_socket, False)
-                        print(f'<{formattedTime}> Sent key to {dec_user}')
+                    if dec_message == ';req' or ' joined the chat!' in dec_message:
+                        if dec_user not in connectedusers:
+                            # send key
+                            time.sleep(0.5)
+                            send_msg(keydec, keyusr_header + keyusr, notif_socket, False)
+                            print(f'<{formattedTime}> Sent key to {dec_user}')
                     elif ' joined the chat!' in message['data'].decode('utf-8') or ' left the chat!' in message['data'].decode('utf-8'):
                         # dont send these; backwards compatibility
                         pass

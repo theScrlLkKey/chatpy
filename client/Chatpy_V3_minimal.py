@@ -4,16 +4,12 @@ import socket
 import cryptography.fernet
 from cryptography.fernet import Fernet
 
-# this is a minimal version of chatpy, because i dont have enough versions to maintain. im trying my hardest to not copy everything
-# this should be fully cross-platform
-# this version does not support any formatting or commands
+# minimal version of chatpyV3, can be run from a terminal
 
 # definitions
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 HEADER_LENGTH = 10
 printTime = 'null'
-hidden_msgs = []
-hidden_usrs = []
 
 
 def encrypt(func_mes, func_key):
@@ -34,14 +30,16 @@ def close():
     exit()
 
 
-def send_message(func_msg):
+def send_message(func_msg, func_enc=True):
     func_msg = func_msg.encode('utf-8')
-    func_msg = encrypt(func_msg, key)
+    if func_enc:
+        func_msg = encrypt(func_msg, key)
     func_msg_header = f"{len(func_msg):<{HEADER_LENGTH}}".encode('utf-8')
     client_socket.send(func_msg_header + func_msg)
 
 
 # ask for ip and port
+# todo: load from file
 IP = str(input('IP address/hostname: '))
 while True:
     try:
@@ -65,7 +63,7 @@ while True:
             except ValueError:
                 print('Port must be a number.')
 client_socket.setblocking(False)
-print(f'Connected to {IP}:{PORT}!')
+print(f'Connected to {IP}:{PORT}! Type exit to quit, and ctrl+c to send a message.')
 
 # setup username
 cli_username = input('Username: ')
@@ -76,10 +74,7 @@ client_socket.send(username_header + username)
 
 # authenticate
 auth_attempt = 10
-message = cli_username + ' joined the chat!'  # ugh, i hate this
-message = message.encode('utf-8')
-message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
-client_socket.send(message_header + message)
+send_message('!req')
 while username != 'enc_distr':
     try:
         username_header = client_socket.recv(HEADER_LENGTH)
@@ -101,7 +96,7 @@ message = client_socket.recv(message_length).decode('utf-8')
 key = message
 print('Secured!')
 
-# start mainloop | this is gonna be hell
+# start mainloop
 while True:
     try:
         while True:
@@ -125,9 +120,9 @@ while True:
                     message = message.decode('utf-8')
                 except cryptography.fernet.InvalidToken:
                     message = message.decode('utf-8')
-                # check for commands, then print
-                if message in hidden_msgs or username in hidden_usrs:
-                    continue
+                # check for formatting, then print
+                if '/me ' in message:
+                    print(f'{printTime} |​⃰ {username} {message.split("/me ")[1]}')
                 else:
                     print(f'{printTime} |{username}: {message}')
             except IOError as Err:
@@ -144,4 +139,7 @@ while True:
     # exception for ctrl+c
     except KeyboardInterrupt:
         # check for commands, then send
-        send_message(input(f'{printTime} |{cli_username}: '))
+        s_input = input(f'{printTime} |{cli_username}: ')
+        if s_input == 'exit':
+            close()
+        send_message(s_input)
