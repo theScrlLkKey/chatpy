@@ -628,7 +628,7 @@ killed = False
 
 # begin chatroom code
 
-path = '../../client/config.txt'
+path = 'config.txt'
 
 HEADER_LENGTH = 10
 
